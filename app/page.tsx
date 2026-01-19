@@ -1,312 +1,529 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  Sparkles,
-  Users,
-  BarChart3,
-  MessageSquare,
-  ChevronRight,
-  Star,
-  Zap,
-  Shield,
-} from 'lucide-react';
+import Image from 'next/image';
 
 export default function LandingPage() {
+  const [showDemo, setShowDemo] = useState(false);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold">
-                <span className="text-lg font-bold text-background">N</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight">NEWFACE</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-gold text-background hover:bg-gold-hover">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
+    <div className="min-h-screen selection:bg-blue-500 selection:text-white">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div className="glass mx-auto mt-4 max-w-7xl flex items-center justify-between px-6 py-4 rounded-full">
+          <div className="flex items-center gap-2">
+            <span className="font-editorial text-2xl font-bold tracking-tighter">
+              NEXT NEW <span className="text-accent italic">FACE</span>
+            </span>
           </div>
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-32 pb-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent" />
-        <div className="relative mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-2 text-sm text-gold">
-              <Sparkles className="h-4 w-4" />
-              AI-Powered Talent Discovery
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium uppercase tracking-widest text-zinc-400">
+            <a href="#how-it-works" className="hover:text-white transition-colors">
+              Process
+            </a>
+            <a href="#features" className="hover:text-white transition-colors">
+              Technology
+            </a>
+            <a href="#pricing" className="hover:text-white transition-colors">
+              Pricing
+            </a>
+          </nav>
+
+          <Link
+            href="/login"
+            className="bg-white text-black text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full hover:bg-zinc-200 transition-colors"
+          >
+            Get Early Access
+          </Link>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1920"
+              alt="Fashion portrait"
+              fill
+              className="object-cover grayscale opacity-40 mix-blend-luminosity"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black"></div>
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+            <div className="inline-block mb-6 px-4 py-1 border border-white/20 rounded-full backdrop-blur-sm">
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-medium text-white/70">
+                Precision Talent Discovery Platform
+              </span>
             </div>
-            <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              Discover Tomorrow&apos;s{' '}
-              <span className="text-gradient-gold">Faces</span> Today
+
+            <h1 className="font-editorial text-5xl md:text-8xl lg:text-9xl mb-8 leading-[1] tracking-tight text-white italic">
+              Find the Next New Face{' '}
+              <span className="block not-italic text-white/90">Before Anyone Else</span>
             </h1>
-            <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
-              The premium talent scouting platform for elite modeling agencies.
-              Leverage AI-powered analysis to identify, evaluate, and sign the next
-              generation of fashion icons.
+
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-zinc-400 mb-10 leading-relaxed font-light">
+              Next New Face scans millions of profiles to find unsigned talent with
+              model potential — so your agency can reach them first.
             </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link href="/signup">
-                <Button size="lg" className="bg-gold text-background hover:bg-gold-hover px-8">
-                  Start Scouting
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="border-border px-8">
-                  View Demo
-                </Button>
-              </Link>
-            </div>
-          </div>
 
-          {/* Stats */}
-          <div className="mt-20 grid grid-cols-2 gap-8 sm:grid-cols-4">
-            {[
-              { value: '50K+', label: 'Talents Discovered' },
-              { value: '500+', label: 'Agencies Worldwide' },
-              { value: '95%', label: 'Accuracy Rate' },
-              { value: '24/7', label: 'AI Analysis' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-gold sm:text-4xl">
-                  {stat.value}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="border-y border-border bg-card/50 py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Everything You Need to Scout Elite Talent
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Powerful tools designed for professional modeling agencies
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                icon: Sparkles,
-                title: 'AI Scoring',
-                description:
-                  'Advanced AI analyzes profiles and provides marketability scores instantly.',
-              },
-              {
-                icon: Users,
-                title: 'Talent Pipeline',
-                description:
-                  'Track candidates through every stage from discovery to signing.',
-              },
-              {
-                icon: BarChart3,
-                title: 'Analytics',
-                description:
-                  'Deep insights into engagement rates, reach, and growth potential.',
-              },
-              {
-                icon: MessageSquare,
-                title: 'Outreach',
-                description:
-                  'Customizable templates for professional talent outreach.',
-              },
-            ].map((feature) => (
-              <div
-                key={feature.title}
-                className="group rounded-xl border border-border bg-card p-6 transition-all hover:border-gold/50 hover:bg-card/80"
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="/signup"
+                className="w-full sm:w-auto bg-accent text-white px-10 py-5 rounded-full text-sm font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_30px_-10px_rgba(59,130,246,0.6)]"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gold/10 text-gold group-hover:bg-gold group-hover:text-background transition-colors">
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <h3 className="mb-2 font-semibold">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              How NEWFACE Works
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Three simple steps to revolutionize your talent discovery
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 lg:grid-cols-3">
-            {[
-              {
-                step: '01',
-                title: 'Upload Profiles',
-                description:
-                  'Import candidate profiles via CSV or add them manually. Support for Instagram, TikTok, and LinkedIn.',
-              },
-              {
-                step: '02',
-                title: 'AI Analysis',
-                description:
-                  'Our AI instantly analyzes each profile, providing detailed scores and actionable insights.',
-              },
-              {
-                step: '03',
-                title: 'Manage Pipeline',
-                description:
-                  'Track candidates through your pipeline, from initial contact to signed contract.',
-              },
-            ].map((item) => (
-              <div key={item.step} className="relative">
-                <div className="text-6xl font-bold text-gold/20">{item.step}</div>
-                <h3 className="mt-4 text-xl font-semibold">{item.title}</h3>
-                <p className="mt-2 text-muted-foreground">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonial */}
-      <section className="border-y border-border bg-card/50 py-20">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="mb-6 flex justify-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-5 w-5 fill-gold text-gold" />
-            ))}
-          </div>
-          <blockquote className="text-2xl font-medium leading-relaxed sm:text-3xl">
-            &ldquo;NEWFACE has transformed how we discover talent. The AI scoring
-            alone has saved us countless hours and helped us sign three rising
-            stars in the past month.&rdquo;
-          </blockquote>
-          <div className="mt-8">
-            <div className="font-semibold">Alexandra Chen</div>
-            <div className="text-sm text-muted-foreground">
-              Head of Talent, Elite Models NYC
+                Start Discovering
+              </Link>
+              <a
+                href="#how-it-works"
+                className="w-full sm:w-auto glass text-white px-10 py-5 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+              >
+                See How it Works
+              </a>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Trust Badges */}
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {[
-              {
-                icon: Zap,
-                title: 'Lightning Fast',
-                description: 'Analyze hundreds of profiles in minutes',
-              },
-              {
-                icon: Shield,
-                title: 'Enterprise Security',
-                description: 'SOC 2 compliant with end-to-end encryption',
-              },
-              {
-                icon: Users,
-                title: 'Trusted by 500+ Agencies',
-                description: 'From boutique firms to global powerhouses',
-              },
-            ].map((badge) => (
-              <div key={badge.title} className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold">
-                  <badge.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-semibold">{badge.title}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {badge.description}
-                  </div>
-                </div>
+            <div className="mt-16 flex items-center justify-center gap-10">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <Image
+                    key={i}
+                    src={`https://picsum.photos/seed/${i + 20}/100/100?grayscale`}
+                    width={40}
+                    height={40}
+                    className="rounded-full border-2 border-black"
+                    alt="Discovered model"
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gold/20 via-gold/10 to-transparent p-12 text-center sm:p-16">
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-            <div className="relative">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Ready to Discover Your Next Star?
-              </h2>
-              <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                Join hundreds of agencies already using NEWFACE to find and sign
-                tomorrow&apos;s top talent.
+              <p className="text-zinc-500 text-sm font-light">
+                <span className="text-white font-medium">500+</span> models discovered
+                this month
               </p>
-              <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link href="/signup">
-                  <Button size="lg" className="bg-gold text-background hover:bg-gold-hover px-8">
-                    Start Free Trial
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button size="lg" variant="outline" className="border-border px-8">
-                    Schedule Demo
-                  </Button>
-                </Link>
-              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof */}
+        <div className="py-12 border-y border-white/5 bg-black/50">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-center text-zinc-600 mb-8">
+              Trusted by top agencies in world capitals
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
+              {['NYC', 'PARIS', 'MILAN', 'LONDON', 'LA', 'TOKYO'].map((city) => (
+                <div key={city} className="flex flex-col items-center">
+                  <span className="font-editorial text-2xl md:text-3xl font-bold tracking-tighter text-white">
+                    {city}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+
+        {/* Problem / Solution */}
+        <section className="py-24 md:py-40 px-6">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+            <div>
+              <h2 className="font-editorial text-4xl md:text-6xl mb-8 italic">
+                Stop Scrolling. <br />
+                <span className="not-italic text-zinc-500">Start Scouting.</span>
+              </h2>
+              <p className="text-lg text-zinc-400 mb-6 leading-relaxed">
+                The traditional way of scouting is broken. Thousands of man-hours are
+                wasted manually scrolling through hashtags, hoping to find a
+                &quot;diamond in the rough.&quot;
+              </p>
+              <div className="space-y-4">
+                {[
+                  'Missed talent because of time zone differences',
+                  'Relying on luck and manual discovery',
+                  'Inefficient outreach to already signed models',
+                  'Inconsistent data on physical attributes',
+                ].map((point, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-zinc-500">
+                    <span className="text-red-900/50">✕</span>
+                    <span className="text-sm font-light uppercase tracking-widest">
+                      {point}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass p-8 md:p-12 rounded-3xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent/20 blur-3xl group-hover:bg-accent/40 transition-colors"></div>
+              <h3 className="text-2xl font-editorial italic mb-6">
+                The Next New Face Advantage
+              </h3>
+              <p className="text-zinc-400 mb-8 font-light">
+                We use computer vision and predictive analytics to identify
+                individuals with model-grade characteristics across Instagram and
+                TikTok before they enter the industry.
+              </p>
+              <ul className="space-y-6">
+                {[
+                  {
+                    title: 'Predictive Potential Score',
+                    desc: 'AI analysis of bone structure, symmetry, and marketability.',
+                  },
+                  {
+                    title: 'Unsigned Filtering',
+                    desc: 'Proprietary logic detects if a talent is already represented by competitors.',
+                  },
+                  {
+                    title: 'Global 24/7 Scanning',
+                    desc: 'Our scouts never sleep, covering every timezone and niche community.',
+                  },
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-4">
+                    <div className="w-6 h-6 rounded-full bg-accent/20 border border-accent flex items-center justify-center mt-1">
+                      <span className="text-[10px]">✓</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white text-sm font-bold uppercase tracking-widest mb-1">
+                        {item.title}
+                      </h4>
+                      <p className="text-zinc-500 text-xs">{item.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section id="how-it-works" className="py-24 bg-zinc-950 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-20">
+              <h2 className="font-editorial text-4xl md:text-6xl mb-6 italic">
+                The Discovery Engine
+              </h2>
+              <p className="text-zinc-500 font-light max-w-xl mx-auto uppercase tracking-widest text-xs">
+                Transforming intuition into a scalable data-driven pipeline.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-12">
+              {[
+                {
+                  number: '01',
+                  title: 'Set Your Look',
+                  desc: "Define your requirements: height, age, location, and 'look' type (editorial, commercial, high fashion).",
+                  img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800',
+                },
+                {
+                  number: '02',
+                  title: 'AI Analysis',
+                  desc: "Next New Face scans millions of profiles hourly, scoring candidates based on your agency's historical signing success.",
+                  img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800',
+                },
+                {
+                  number: '03',
+                  title: 'Sign Talent',
+                  desc: 'Review scored portfolios, check authenticity metrics, and reach out directly with one-click templates.',
+                  img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=800',
+                },
+              ].map((step, idx) => (
+                <div key={idx} className="group cursor-default">
+                  <div className="relative overflow-hidden aspect-[3/4] rounded-2xl mb-8">
+                    <Image
+                      src={step.img}
+                      alt={step.title}
+                      fill
+                      className="object-cover grayscale brightness-50 group-hover:scale-105 group-hover:grayscale-0 group-hover:brightness-75 transition-all duration-700"
+                    />
+                    <div className="absolute top-6 left-6 font-editorial text-4xl text-white/50">
+                      {step.number}
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold uppercase tracking-widest mb-4">
+                    {step.title}
+                  </h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed font-light">
+                    {step.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="py-24 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+              <div>
+                <span className="text-accent text-xs font-bold uppercase tracking-[0.3em] mb-4 block">
+                  Technology
+                </span>
+                <h2 className="font-editorial text-4xl md:text-6xl italic">
+                  Intelligence at Scale
+                </h2>
+              </div>
+              <p className="max-w-md text-zinc-500 font-light italic leading-relaxed">
+                We don&apos;t just find people. We find the specific people who will
+                build your agency&apos;s next decade of success.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  title: 'Multi-Platform Scouting',
+                  desc: 'Unified pipeline for discovery across Instagram, TikTok, and emerging platforms.',
+                  icon: '🌐',
+                },
+                {
+                  title: 'Deep Authenticity Score',
+                  desc: 'Analyze engagement rates and bot activity to ensure talent has real influence.',
+                  icon: '🛡️',
+                },
+                {
+                  title: 'Attribute Extraction',
+                  desc: 'Automatically estimate height, build, and skin tones from multiple images.',
+                  icon: '📏',
+                },
+                {
+                  title: 'CRM Integration',
+                  desc: 'Manage your scouting funnel from first contact to signed contract.',
+                  icon: '📊',
+                },
+                {
+                  title: 'One-Click Outreach',
+                  desc: 'Personalized DM and email templates designed to convert.',
+                  icon: '✉️',
+                },
+                {
+                  title: 'Historical Context',
+                  desc: "Compare new faces against your agency's past 10 years of successful signings.",
+                  icon: '🕰️',
+                },
+              ].map((f, i) => (
+                <div
+                  key={i}
+                  className="glass p-8 rounded-3xl hover:bg-white/[0.05] transition-colors border-white/5 group"
+                >
+                  <div className="text-3xl mb-6 group-hover:scale-125 transition-transform duration-500 block w-fit">
+                    {f.icon}
+                  </div>
+                  <h3 className="text-white text-sm font-bold uppercase tracking-widest mb-4">
+                    {f.title}
+                  </h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed font-light">
+                    {f.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonial */}
+        <section className="py-24 bg-navy px-6 relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-blue-500/10 blur-[120px] rounded-full"></div>
+
+          <div className="max-w-4xl mx-auto relative z-10 text-center">
+            <span className="text-accent text-5xl font-editorial mb-8 block leading-none">
+              &quot;
+            </span>
+            <blockquote className="font-editorial text-3xl md:text-5xl italic leading-tight text-white mb-10">
+              Next New Face found three of our biggest new faces in the first two
+              weeks. We would have never discovered a farm girl from North Dakota
+              without this tool. It&apos;s the industry&apos;s best kept secret.
+            </blockquote>
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full overflow-hidden mb-4 border-2 border-accent">
+                <Image
+                  src="https://picsum.photos/seed/fashionbooker/100/100?grayscale"
+                  alt="Booker Portrait"
+                  width={64}
+                  height={64}
+                  className="object-cover"
+                />
+              </div>
+              <cite className="not-italic">
+                <span className="block text-white font-bold uppercase tracking-widest text-xs">
+                  Marcello Rossi
+                </span>
+                <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mt-1">
+                  Head of Scouting, Elite Models New Faces
+                </span>
+              </cite>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="pricing" className="py-24 md:py-40 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-20">
+              <h2 className="font-editorial text-4xl md:text-6xl italic mb-6">
+                Invest in the Future
+              </h2>
+              <p className="text-zinc-500 font-light text-xs uppercase tracking-[0.3em]">
+                Scalable solutions for every agency size.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+              <div className="glass p-10 md:p-16 rounded-[3rem] border-white/10 hover:border-accent/30 transition-colors">
+                <h3 className="font-editorial text-3xl italic mb-4">Mother Agency</h3>
+                <p className="text-zinc-500 text-sm mb-10 font-light">
+                  Perfect for growing agencies in secondary markets.
+                </p>
+                <div className="text-5xl font-editorial mb-10">
+                  $850{' '}
+                  <span className="text-lg text-zinc-500 font-light not-italic">
+                    /month
+                  </span>
+                </div>
+                <ul className="space-y-4 mb-12">
+                  {[
+                    'Daily Profile Scanning',
+                    '500 Scored Leads/Mo',
+                    'Basic CRM Features',
+                    'Email Support',
+                  ].map((t) => (
+                    <li
+                      key={t}
+                      className="flex items-center gap-3 text-zinc-400 text-sm font-light"
+                    >
+                      <span className="text-accent">●</span> {t}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className="block w-full py-4 rounded-full border border-white/20 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all text-center"
+                >
+                  Request Access
+                </Link>
+              </div>
+
+              <div className="bg-white text-black p-10 md:p-16 rounded-[3rem] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 bg-accent text-white px-8 py-2 text-[10px] font-bold uppercase tracking-widest transform translate-x-4 translate-y-4 rotate-45 shadow-lg">
+                  Most Popular
+                </div>
+                <h3 className="font-editorial text-3xl italic mb-4">International</h3>
+                <p className="text-zinc-800/70 text-sm mb-10 font-light">
+                  The standard for world-class scouting divisions.
+                </p>
+                <div className="text-5xl font-editorial mb-10">
+                  $2,400{' '}
+                  <span className="text-lg text-zinc-800/50 font-light not-italic">
+                    /month
+                  </span>
+                </div>
+                <ul className="space-y-4 mb-12">
+                  {[
+                    'Real-time Scanning',
+                    'Unlimited Leads',
+                    'Full Pipeline CRM',
+                    'Physical Attribute Extraction',
+                    'Priority Support',
+                  ].map((t) => (
+                    <li
+                      key={t}
+                      className="flex items-center gap-3 text-zinc-800 text-sm font-medium"
+                    >
+                      <span className="text-accent">●</span> {t}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className="block w-full py-4 rounded-full bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors shadow-2xl text-center"
+                >
+                  Start Discovering
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-20 text-center">
+              <p className="text-zinc-600 text-xs font-light uppercase tracking-widest">
+                Need a custom enterprise solution?{' '}
+                <a href="#" className="text-white hover:underline">
+                  Contact our concierge team
+                </a>
+                .
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold">
-                <span className="text-lg font-bold text-background">N</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight">NEWFACE</span>
+      <footer className="py-20 border-t border-white/5 px-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+          <div className="md:col-span-2">
+            <div className="font-editorial text-3xl font-bold tracking-tighter mb-6">
+              NEXT NEW <span className="text-accent italic">FACE</span>
             </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link href="#" className="hover:text-foreground transition-colors">
-                Privacy
-              </Link>
-              <Link href="#" className="hover:text-foreground transition-colors">
-                Terms
-              </Link>
-              <Link href="#" className="hover:text-foreground transition-colors">
-                Contact
-              </Link>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} NEWFACE. All rights reserved.
-            </div>
+            <p className="text-zinc-500 text-sm max-w-xs leading-relaxed font-light">
+              The next generation of talent discovery, built for the modern fashion
+              industry. Powered by advanced computer vision and predictive
+              intelligence.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="text-white text-[10px] font-bold uppercase tracking-widest mb-6">
+              Platform
+            </h4>
+            <ul className="space-y-4">
+              {['Process', 'Technology', 'Case Studies', 'Pricing'].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="text-zinc-500 hover:text-white transition-colors text-xs font-light uppercase tracking-widest"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white text-[10px] font-bold uppercase tracking-widest mb-6">
+              Company
+            </h4>
+            <ul className="space-y-4">
+              {['About Us', 'Contact', 'Privacy Policy', 'Terms of Service'].map(
+                (item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-zinc-500 hover:text-white transition-colors text-xs font-light uppercase tracking-widest"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-zinc-600 text-[10px] font-light uppercase tracking-widest">
+            © 2025 Next New Face Inc. All Rights Reserved.
+          </p>
+          <div className="flex items-center gap-8">
+            {['Instagram', 'LinkedIn', 'Twitter'].map((social) => (
+              <a
+                key={social}
+                href="#"
+                className="text-zinc-600 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest"
+              >
+                {social}
+              </a>
+            ))}
           </div>
         </div>
       </footer>

@@ -52,46 +52,46 @@
 :root {
   --radius: 0.625rem;
   /* Dark base colors */
-  --background: #0a0a0a;
-  --foreground: #fafafa;
+  --background: #050505;
+  --foreground: #f8f8f8;
   --card: #141414;
-  --card-foreground: #fafafa;
+  --card-foreground: #f8f8f8;
   --popover: #141414;
-  --popover-foreground: #fafafa;
-  /* Gold accents */
-  --gold: #d4af37;
-  --gold-hover: #f4cf57;
-  --primary: #d4af37;
-  --primary-foreground: #0a0a0a;
+  --popover-foreground: #f8f8f8;
+  /* Blue accent (Electric Blue) */
+  --gold: #3B82F6;
+  --gold-hover: #60A5FA;
+  --primary: #3B82F6;
+  --primary-foreground: #050505;
   /* Secondary/Muted */
   --secondary: #1a1a1a;
-  --secondary-foreground: #fafafa;
+  --secondary-foreground: #f8f8f8;
   --muted: #262626;
   --muted-foreground: #737373;
-  /* Accent uses gold */
-  --accent: #1a1a1a;
-  --accent-foreground: #d4af37;
+  /* Accent */
+  --accent: #3B82F6;
+  --accent-foreground: #f8f8f8;
   /* Destructive */
   --destructive: #dc2626;
   /* Borders and inputs */
-  --border: #262626;
-  --input: #262626;
-  --ring: #d4af37;
-  /* Charts - gold spectrum */
-  --chart-1: #d4af37;
-  --chart-2: #b8960c;
-  --chart-3: #8b7355;
-  --chart-4: #c9a227;
-  --chart-5: #e6c200;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #3B82F6;
+  /* Charts */
+  --chart-1: #3B82F6;
+  --chart-2: #60A5FA;
+  --chart-3: #93C5FD;
+  --chart-4: #2563EB;
+  --chart-5: #1D4ED8;
   /* Sidebar */
   --sidebar: #0f0f0f;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #d4af37;
-  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-foreground: #f8f8f8;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #050505;
   --sidebar-accent: #1a1a1a;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: #262626;
-  --sidebar-ring: #d4af37;
+  --sidebar-accent-foreground: #f8f8f8;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #3B82F6;
 }
 
 @layer base {
@@ -100,7 +100,38 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
   }
+}
+
+/* Editorial/Serif Font */
+.font-editorial {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Navy background */
+.bg-navy {
+  background-color: #0A0F1E;
+}
+
+/* Accent color utilities */
+.text-accent {
+  color: #3B82F6;
+}
+
+.border-accent {
+  border-color: #3B82F6;
+}
+
+.bg-accent {
+  background-color: #3B82F6;
 }
 
 /* Custom utility classes */
@@ -129,4 +160,23 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+}
+
+/* Animations */
+@keyframes slide-left {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-left {
+  animation: slide-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
 }

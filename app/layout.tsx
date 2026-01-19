@@ -1,21 +1,27 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
-  variable: '--font-geist-sans',
+  variable: '--font-inter',
+  subsets: ['latin'],
+});
+
+const playfair = Playfair_Display({
+  variable: '--font-playfair',
   subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: 'NEWFACE | Discover Tomorrow\'s Faces Today',
+  title: 'Next New Face | AI-Powered Model Discovery',
   description:
-    'Premium fashion talent scouting platform with AI-powered analysis. Discover, analyze, and manage modeling talent with cutting-edge technology.',
+    'Next New Face scans millions of profiles to find unsigned talent with model potential — so your agency can reach them first.',
   keywords: [
     'modeling agency',
     'talent scouting',
     'fashion',
-    'AI analysis',
+    'AI discovery',
+    'model scouting',
     'talent management',
   ],
 };
@@ -27,7 +33,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <head>
+        <style>{`
+          .font-editorial {
+            font-family: var(--font-playfair), 'Playfair Display', serif;
+          }
+        `}</style>
+      </head>
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
