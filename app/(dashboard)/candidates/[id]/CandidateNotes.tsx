@@ -1,11 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, StickyNote } from 'lucide-react';
+import { Save, StickyNote, Check } from 'lucide-react';
 
 interface CandidateNotesProps {
   candidateId: string;
@@ -17,54 +15,41 @@ export function CandidateNotes({
   initialNotes,
 }: CandidateNotesProps) {
   const [notes, setNotes] = useState(initialNotes);
-  const [loading, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const supabase = createClient();
 
-  const handleSave = async () => {
-    setSaving(true);
-    setSaved(false);
-
-    const { error } = await supabase
-      .from('candidates')
-      .update({ notes })
-      .eq('id', candidateId);
-
-    setSaving(false);
-
-    if (!error) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }
+  const handleSave = () => {
+    // In demo mode, we just show a saved confirmation
+    // In production, this would call Supabase
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <StickyNote className="h-5 w-5 text-gold" />
-          Notes
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-zinc-100">
+      <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4">
+        <StickyNote className="h-4 w-4" />
+        Notes
+      </h2>
+      <div className="space-y-4">
         <Textarea
           placeholder="Add your notes about this candidate..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="min-h-[200px] resize-none bg-background"
+          className="min-h-[150px] resize-none bg-zinc-50 border-zinc-200 text-zinc-700 placeholder:text-zinc-400 focus:border-zinc-300 focus:ring-zinc-200"
         />
         <Button
           onClick={handleSave}
-          disabled={loading}
-          className="w-full bg-gold text-background hover:bg-gold-hover"
+          className={`w-full transition-colors ${
+            saved
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+          }`}
         >
-          {loading ? (
+          {saved ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
+              <Check className="mr-2 h-4 w-4" />
+              Saved!
             </>
-          ) : saved ? (
-            'Saved!'
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
@@ -72,7 +57,7 @@ export function CandidateNotes({
             </>
           )}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
