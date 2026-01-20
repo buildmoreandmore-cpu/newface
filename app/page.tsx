@@ -168,7 +168,7 @@ export default function LandingPage() {
                 {[
                   {
                     title: 'Predictive Potential Score',
-                    desc: 'AI analysis of bone structure, symmetry, and marketability.',
+                    desc: 'Advanced analysis of bone structure, symmetry, and marketability.',
                   },
                   {
                     title: 'Unsigned Filtering',
@@ -218,7 +218,7 @@ export default function LandingPage() {
                 },
                 {
                   number: '02',
-                  title: 'AI Analysis',
+                  title: 'Smart Analysis',
                   desc: "Next New Face scans millions of profiles hourly, scoring candidates based on your agency's historical signing success.",
                   img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800',
                 },
