@@ -44,13 +44,13 @@ export default function LandingPage() {
         <section className="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <Image
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1920"
+              src="/hero-model.png"
               alt="Fashion portrait"
               fill
-              className="object-cover grayscale opacity-40 mix-blend-luminosity"
+              className="object-cover object-top opacity-50"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black"></div>
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
