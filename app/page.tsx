@@ -35,10 +35,18 @@ export default function LandingPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden bg-gradient-to-b from-zinc-50 to-white">
-          {/* Subtle gradient orbs */}
-          <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50" />
-          <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-50" />
+        <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+          {/* Background Model Image */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/hero-model.png"
+              alt="Fashion portrait"
+              fill
+              className="object-cover object-top opacity-20"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/80 to-white"></div>
+          </div>
 
           <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-6 text-center">
             <div className="inline-block mb-6 px-4 py-2 bg-zinc-100 rounded-full">
@@ -72,24 +80,6 @@ export default function LandingPage() {
               </a>
             </div>
 
-            <div className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-10">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <Image
-                    key={i}
-                    src={`https://picsum.photos/seed/${i + 20}/100/100`}
-                    width={40}
-                    height={40}
-                    className="rounded-full border-2 border-white shadow-sm"
-                    alt="Discovered model"
-                  />
-                ))}
-              </div>
-              <p className="text-zinc-500 text-sm font-light">
-                <span className="text-zinc-900 font-semibold">500+</span> models discovered
-                this month
-              </p>
-            </div>
           </div>
         </section>
 
@@ -311,25 +301,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA Section - Light with accent */}
-        <section className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-accent to-blue-600 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-
-          <div className="max-w-4xl mx-auto relative z-10 text-center">
-            <h2 className="font-editorial text-3xl md:text-4xl lg:text-5xl italic leading-tight text-white mb-6">
-              Ready to Discover Tomorrow&apos;s Faces Today?
-            </h2>
-            <p className="text-white/80 text-base md:text-lg mb-8 font-light max-w-2xl mx-auto">
-              Join the leading agencies already using Next New Face to stay ahead of the competition.
-            </p>
-            <Link
-              href="/signup"
-              className="inline-block bg-white text-accent px-8 md:px-12 py-4 md:py-5 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-zinc-100 transition-colors shadow-xl"
-            >
-              Start Free Trial
-            </Link>
-          </div>
-        </section>
       </main>
 
       {/* Footer - Light theme */}
