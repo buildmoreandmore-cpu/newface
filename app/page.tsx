@@ -42,10 +42,10 @@ export default function LandingPage() {
               src="/hero-model.png"
               alt="Fashion portrait"
               fill
-              className="object-cover object-top opacity-60"
+              className="object-cover object-top opacity-90"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/50 to-white"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/40 to-white"></div>
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-6 text-center">
