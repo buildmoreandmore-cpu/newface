@@ -50,11 +50,11 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dashboard-light">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -62,16 +62,16 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-sidebar transition-transform lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white transition-transform lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold">
-            <span className="text-lg font-bold text-background">N</span>
+        <div className="flex h-16 items-center gap-2 border-b border-zinc-200 px-6">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+            <span className="text-lg font-bold text-white">N</span>
           </div>
-          <span className="text-xl font-bold tracking-tight">NEWFACE</span>
+          <span className="text-xl font-bold tracking-tight text-zinc-900">NEWFACE</span>
           <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -93,8 +93,8 @@ export default function DashboardLayout({
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-gold/10 text-gold'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-accent/10 text-accent'
+                    : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
                 )}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -106,12 +106,12 @@ export default function DashboardLayout({
         </nav>
 
         {/* User menu */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-zinc-200 p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-gold/10 text-gold">
+                  <AvatarFallback className="bg-accent/10 text-accent">
                     U
                   </AvatarFallback>
                 </Avatar>
@@ -136,16 +136,16 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-6 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-zinc-200 bg-white/80 px-6 backdrop-blur-xl">
           <button
-            className="lg:hidden"
+            className="lg:hidden text-zinc-600"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
           <Link href="/upload">
-            <Button className="bg-gold text-background hover:bg-gold-hover">
+            <Button className="bg-accent text-white hover:bg-accent/90">
               <Upload className="mr-2 h-4 w-4" />
               Upload Profiles
             </Button>

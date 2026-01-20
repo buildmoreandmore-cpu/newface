@@ -1,25 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-  Users,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  Sparkles,
-  ArrowRight,
-} from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import type { Candidate } from '@/types';
 
-// Demo data for preview
-const demoStats = {
-  total: 47,
-  discovered: 28,
-  contacted: 12,
-  signed: 7,
-};
-
-const demoCandidates: Partial<Candidate>[] = [
+// Demo data with model images
+const demoCandidates: (Partial<Candidate> & { image: string })[] = [
   {
     id: '1',
     name: 'Sofia Andersson',
@@ -27,7 +12,8 @@ const demoCandidates: Partial<Candidate>[] = [
     platform: 'instagram',
     status: 'discovered',
     ai_score: 94,
-    location: 'Stockholm, Sweden',
+    location: 'Stockholm',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop',
   },
   {
     id: '2',
@@ -36,7 +22,8 @@ const demoCandidates: Partial<Candidate>[] = [
     platform: 'tiktok',
     status: 'contacted',
     ai_score: 91,
-    location: 'Shanghai, China',
+    location: 'Shanghai',
+    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop',
   },
   {
     id: '3',
@@ -45,7 +32,8 @@ const demoCandidates: Partial<Candidate>[] = [
     platform: 'instagram',
     status: 'meeting',
     ai_score: 89,
-    location: 'Lagos, Nigeria',
+    location: 'Lagos',
+    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
   },
   {
     id: '4',
@@ -54,7 +42,8 @@ const demoCandidates: Partial<Candidate>[] = [
     platform: 'instagram',
     status: 'signed',
     ai_score: 87,
-    location: 'Paris, France',
+    location: 'Paris',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop',
   },
   {
     id: '5',
@@ -63,170 +52,145 @@ const demoCandidates: Partial<Candidate>[] = [
     platform: 'tiktok',
     status: 'discovered',
     ai_score: 85,
-    location: 'London, UK',
+    location: 'London',
+    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop',
+  },
+  {
+    id: '6',
+    name: 'Yuki Tanaka',
+    handle: 'yukitanaka',
+    platform: 'instagram',
+    status: 'contacted',
+    ai_score: 92,
+    location: 'Tokyo',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop',
+  },
+  {
+    id: '7',
+    name: 'Marcus Johnson',
+    handle: 'marcusj',
+    platform: 'instagram',
+    status: 'discovered',
+    ai_score: 88,
+    location: 'New York',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop',
+  },
+  {
+    id: '8',
+    name: 'Isabella Costa',
+    handle: 'bellacosta',
+    platform: 'tiktok',
+    status: 'meeting',
+    ai_score: 90,
+    location: 'São Paulo',
+    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop',
   },
 ];
 
+const stats = [
+  { label: 'Discovered', value: 28, color: 'bg-blue-500' },
+  { label: 'Contacted', value: 12, color: 'bg-amber-500' },
+  { label: 'In Meeting', value: 5, color: 'bg-purple-500' },
+  { label: 'Signed', value: 7, color: 'bg-emerald-500' },
+];
+
+const statusColors: Record<string, string> = {
+  discovered: 'bg-blue-100 text-blue-700',
+  contacted: 'bg-amber-100 text-amber-700',
+  meeting: 'bg-purple-100 text-purple-700',
+  signed: 'bg-emerald-100 text-emerald-700',
+  rejected: 'bg-red-100 text-red-700',
+};
+
 export default function DashboardPage() {
-  const stats = demoStats;
-  const recentCandidates = demoCandidates;
-  const topScored = [...demoCandidates].sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0));
-
-  const statCards = [
-    {
-      title: 'Total Candidates',
-      value: stats.total,
-      icon: Users,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
-    },
-    {
-      title: 'Discovered',
-      value: stats.discovered,
-      icon: Sparkles,
-      color: 'text-accent',
-      bgColor: 'bg-accent/10',
-    },
-    {
-      title: 'In Pipeline',
-      value: stats.contacted,
-      icon: Clock,
-      color: 'text-orange-500',
-      bgColor: 'bg-orange-500/10',
-    },
-    {
-      title: 'Signed',
-      value: stats.signed,
-      icon: CheckCircle,
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10',
-    },
-  ];
-
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your talent discovery pipeline
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="font-editorial text-4xl md:text-5xl italic tracking-tight text-zinc-900">
+            Discover
+          </h1>
+          <p className="text-zinc-500 mt-1">
+            Your talent discovery pipeline
+          </p>
+        </div>
+
+        {/* Stats Pills */}
+        <div className="flex flex-wrap gap-3">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-zinc-100"
+            >
+              <div className={`w-2 h-2 rounded-full ${stat.color}`} />
+              <span className="text-sm font-medium text-zinc-900">{stat.value}</span>
+              <span className="text-sm text-zinc-500">{stat.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <Card key={stat.title}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div
-                className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.bgColor}`}
-              >
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+      {/* Editorial Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {demoCandidates.map((candidate) => (
+          <Link
+            key={candidate.id}
+            href={`/candidates/${candidate.id}`}
+            className="group relative block"
+          >
+            {/* Image Container */}
+            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-100">
+              <Image
+                src={candidate.image}
+                alt={candidate.name || ''}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              {/* Score Badge */}
+              <div className="absolute top-3 right-3">
+                <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+                  <span className="text-sm font-bold text-zinc-900">{candidate.ai_score}</span>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.title}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
+
+              {/* Status Badge */}
+              <div className="absolute top-3 left-3">
+                <Badge className={`${statusColors[candidate.status || 'discovered']} border-0 font-medium`}>
+                  {candidate.status}
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Info Overlay on Hover */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-white/70 text-xs uppercase tracking-wider">
+                  @{candidate.handle}
+                </p>
+              </div>
+            </div>
+
+            {/* Info Below Image */}
+            <div className="mt-3 space-y-1">
+              <h3 className="font-medium text-zinc-900 group-hover:text-accent transition-colors">
+                {candidate.name}
+              </h3>
+              <p className="text-sm text-zinc-500">
+                {candidate.location}
+              </p>
+            </div>
+          </Link>
         ))}
       </div>
 
-      {/* Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Candidates */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Recent Candidates</CardTitle>
-            <Link
-              href="/pipeline"
-              className="flex items-center gap-1 text-sm text-accent hover:opacity-80"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentCandidates.map((candidate) => (
-                <Link
-                  key={candidate.id}
-                  href={`/candidates/${candidate.id}`}
-                  className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-muted"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">
-                    {candidate.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{candidate.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      @{candidate.handle}
-                    </p>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      candidate.status === 'signed'
-                        ? 'bg-green-500/10 text-green-500'
-                        : candidate.status === 'rejected'
-                        ? 'bg-destructive/10 text-destructive'
-                        : ''
-                    }
-                  >
-                    {candidate.status}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Top Scored */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Top AI Scores</CardTitle>
-            <TrendingUp className="h-5 w-5 text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {topScored.map((candidate, index) => (
-                <Link
-                  key={candidate.id}
-                  href={`/candidates/${candidate.id}`}
-                  className="flex items-center gap-4 rounded-lg p-2 transition-colors hover:bg-muted"
-                >
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${
-                      index === 0
-                        ? 'bg-accent text-white'
-                        : index === 1
-                        ? 'bg-zinc-400 text-background'
-                        : index === 2
-                        ? 'bg-amber-700 text-background'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{candidate.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {candidate.location}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-accent">
-                      {candidate.ai_score}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      AI Score
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Load More */}
+      <div className="flex justify-center pt-4">
+        <button className="px-8 py-3 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors">
+          Load More Candidates
+        </button>
       </div>
     </div>
   );
