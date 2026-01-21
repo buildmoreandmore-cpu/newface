@@ -2,157 +2,37 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { ScoreDimensions } from '@/components/candidates/ScoreDimensions';
-import type { Candidate, DimensionScore } from '@/types';
-
-// Demo data with model images and dimension scores
-interface DemoCandidate extends Partial<Candidate> {
-  image: string;
-  physical_potential?: DimensionScore;
-  unsigned_probability?: DimensionScore;
-  reachability?: DimensionScore;
-  engagement_health?: DimensionScore;
-  vision_analyzed?: boolean;
-}
-
-const demoCandidates: DemoCandidate[] = [
-  {
-    id: '1',
-    name: 'Sofia Andersson',
-    handle: 'sofia.model',
-    platform: 'instagram',
-    status: 'discovered',
-    ai_score: 94,
-    location: 'Stockholm',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 96, confidence: 92, factors: [], notes: '' },
-    unsigned_probability: { score: 85, confidence: 78, factors: [], notes: '' },
-    reachability: { score: 92, confidence: 88, factors: [], notes: '' },
-    engagement_health: { score: 89, confidence: 85, factors: [], notes: '' },
-  },
-  {
-    id: '2',
-    name: 'Kai Chen',
-    handle: 'kaichen_',
-    platform: 'tiktok',
-    status: 'contacted',
-    ai_score: 91,
-    location: 'Shanghai',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 92, confidence: 90, factors: [], notes: '' },
-    unsigned_probability: { score: 78, confidence: 72, factors: [], notes: '' },
-    reachability: { score: 88, confidence: 82, factors: [], notes: '' },
-    engagement_health: { score: 94, confidence: 91, factors: [], notes: '' },
-  },
-  {
-    id: '3',
-    name: 'Amara Okonkwo',
-    handle: 'amarao',
-    platform: 'instagram',
-    status: 'meeting',
-    ai_score: 89,
-    location: 'Lagos',
-    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 90, confidence: 87, factors: [], notes: '' },
-    unsigned_probability: { score: 82, confidence: 75, factors: [], notes: '' },
-    reachability: { score: 85, confidence: 80, factors: [], notes: '' },
-    engagement_health: { score: 88, confidence: 84, factors: [], notes: '' },
-  },
-  {
-    id: '4',
-    name: 'Lucas Moreau',
-    handle: 'lucasm',
-    platform: 'instagram',
-    status: 'signed',
-    ai_score: 87,
-    location: 'Paris',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 94, confidence: 95, factors: [], notes: '' },
-    unsigned_probability: { score: 15, confidence: 95, factors: [], notes: '' },
-    reachability: { score: 45, confidence: 90, factors: [], notes: '' },
-    engagement_health: { score: 82, confidence: 88, factors: [], notes: '' },
-  },
-  {
-    id: '5',
-    name: 'Emma Williams',
-    handle: 'emmaw_model',
-    platform: 'tiktok',
-    status: 'discovered',
-    ai_score: 85,
-    location: 'London',
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 86, confidence: 83, factors: [], notes: '' },
-    unsigned_probability: { score: 88, confidence: 82, factors: [], notes: '' },
-    reachability: { score: 90, confidence: 86, factors: [], notes: '' },
-    engagement_health: { score: 95, confidence: 92, factors: [], notes: '' },
-  },
-  {
-    id: '6',
-    name: 'Yuki Tanaka',
-    handle: 'yukitanaka',
-    platform: 'instagram',
-    status: 'contacted',
-    ai_score: 92,
-    location: 'Tokyo',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 94, confidence: 91, factors: [], notes: '' },
-    unsigned_probability: { score: 72, confidence: 68, factors: [], notes: '' },
-    reachability: { score: 80, confidence: 75, factors: [], notes: '' },
-    engagement_health: { score: 91, confidence: 88, factors: [], notes: '' },
-  },
-  {
-    id: '7',
-    name: 'Marcus Johnson',
-    handle: 'marcusj',
-    platform: 'instagram',
-    status: 'discovered',
-    ai_score: 88,
-    location: 'New York',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 88, confidence: 86, factors: [], notes: '' },
-    unsigned_probability: { score: 90, confidence: 85, factors: [], notes: '' },
-    reachability: { score: 92, confidence: 88, factors: [], notes: '' },
-    engagement_health: { score: 84, confidence: 80, factors: [], notes: '' },
-  },
-  {
-    id: '8',
-    name: 'Isabella Costa',
-    handle: 'bellacosta',
-    platform: 'tiktok',
-    status: 'meeting',
-    ai_score: 90,
-    location: 'São Paulo',
-    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop',
-    vision_analyzed: true,
-    physical_potential: { score: 92, confidence: 89, factors: [], notes: '' },
-    unsigned_probability: { score: 65, confidence: 70, factors: [], notes: '' },
-    reachability: { score: 82, confidence: 78, factors: [], notes: '' },
-    engagement_health: { score: 96, confidence: 94, factors: [], notes: '' },
-  },
-];
-
-const stats = [
-  { label: 'Discovered', value: 28, color: 'bg-blue-500' },
-  { label: 'Contacted', value: 12, color: 'bg-amber-500' },
-  { label: 'In Meeting', value: 5, color: 'bg-purple-500' },
-  { label: 'Signed', value: 7, color: 'bg-emerald-500' },
-];
+import { createClient } from '@/lib/supabase/server';
+import { Sparkles } from 'lucide-react';
+import type { Candidate } from '@/types';
 
 const statusColors: Record<string, string> = {
   discovered: 'bg-blue-100 text-blue-700',
   contacted: 'bg-amber-100 text-amber-700',
+  responded: 'bg-cyan-100 text-cyan-700',
   meeting: 'bg-purple-100 text-purple-700',
   signed: 'bg-emerald-100 text-emerald-700',
   rejected: 'bg-red-100 text-red-700',
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  // Fetch candidates from database
+  const { data: candidates } = await supabase
+    .from('candidates')
+    .select('*')
+    .order('ai_score', { ascending: false })
+    .limit(50);
+
+  // Calculate stats from real data
+  const stats = [
+    { label: 'Discovered', value: candidates?.filter(c => c.status === 'discovered').length || 0, color: 'bg-blue-500' },
+    { label: 'Contacted', value: candidates?.filter(c => c.status === 'contacted').length || 0, color: 'bg-amber-500' },
+    { label: 'In Meeting', value: candidates?.filter(c => c.status === 'meeting').length || 0, color: 'bg-purple-500' },
+    { label: 'Signed', value: candidates?.filter(c => c.status === 'signed').length || 0, color: 'bg-emerald-500' },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -181,76 +61,123 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Editorial Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {demoCandidates.map((candidate) => (
-          <Link
-            key={candidate.id}
-            href={`/candidates/${candidate.id}`}
-            className="group relative block"
-          >
-            {/* Image Container */}
-            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-100">
-              <Image
-                src={candidate.image}
-                alt={candidate.name || ''}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+      {/* Empty State or Grid */}
+      {!candidates || candidates.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="mb-6 rounded-full bg-accent/10 p-6">
+            <Sparkles className="h-12 w-12 text-accent" />
+          </div>
+          <h2 className="text-2xl font-semibold text-zinc-900 mb-2">No candidates yet</h2>
+          <p className="text-zinc-500 max-w-md mb-6">
+            Start discovering talent by running a search on Instagram or TikTok, or upload a CSV of profiles.
+          </p>
+          <div className="flex gap-3">
+            <Link
+              href="/discover"
+              className="px-6 py-3 rounded-full bg-accent text-white font-medium hover:bg-accent/90 transition-colors"
+            >
+              Start Discovery
+            </Link>
+            <Link
+              href="/upload"
+              className="px-6 py-3 rounded-full border border-zinc-200 text-zinc-600 font-medium hover:bg-zinc-50 transition-colors"
+            >
+              Upload CSV
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Editorial Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {candidates.map((candidate: Candidate) => (
+              <Link
+                key={candidate.id}
+                href={`/candidates/${candidate.id}`}
+                className="group relative block"
+              >
+                {/* Image Container */}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-100">
+                  {candidate.avatar_url ? (
+                    <Image
+                      src={candidate.avatar_url}
+                      alt={candidate.name || ''}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-200">
+                      <span className="text-4xl font-bold text-zinc-400">
+                        {candidate.name?.charAt(0) || '?'}
+                      </span>
+                    </div>
+                  )}
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-              {/* Score Badge */}
-              <div className="absolute top-3 right-3">
-                <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                  <span className="text-sm font-bold text-zinc-900">{candidate.ai_score}</span>
+                  {/* Score Badge */}
+                  {candidate.ai_score && (
+                    <div className="absolute top-3 right-3">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+                        <span className="text-sm font-bold text-zinc-900">{candidate.ai_score}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Status Badge */}
+                  <div className="absolute top-3 left-3">
+                    <Badge className={`${statusColors[candidate.status || 'discovered']} border-0 font-medium`}>
+                      {candidate.status}
+                    </Badge>
+                  </div>
+
+                  {/* Info Overlay on Hover */}
+                  {candidate.handle && (
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <p className="text-white/70 text-xs uppercase tracking-wider">
+                        @{candidate.handle}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Status Badge */}
-              <div className="absolute top-3 left-3">
-                <Badge className={`${statusColors[candidate.status || 'discovered']} border-0 font-medium`}>
-                  {candidate.status}
-                </Badge>
-              </div>
+                {/* Info Below Image */}
+                <div className="mt-3 space-y-2">
+                  <h3 className="font-medium text-zinc-900 group-hover:text-accent transition-colors">
+                    {candidate.name}
+                  </h3>
+                  {candidate.location && (
+                    <p className="text-sm text-zinc-500">
+                      {candidate.location}
+                    </p>
+                  )}
+                  {/* Compact Dimension Scores */}
+                  {(candidate.physical_potential_score || candidate.unsigned_probability_score) && (
+                    <ScoreDimensions
+                      physical_potential={candidate.physical_potential_score ? { score: candidate.physical_potential_score, confidence: 0, factors: [], notes: '' } : undefined}
+                      unsigned_probability={candidate.unsigned_probability_score ? { score: candidate.unsigned_probability_score, confidence: 0, factors: [], notes: '' } : undefined}
+                      reachability={candidate.reachability_score ? { score: candidate.reachability_score, confidence: 0, factors: [], notes: '' } : undefined}
+                      engagement_health={candidate.engagement_health_score ? { score: candidate.engagement_health_score, confidence: 0, factors: [], notes: '' } : undefined}
+                      vision_analyzed={candidate.vision_analyzed}
+                      compact
+                    />
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
 
-              {/* Info Overlay on Hover */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white/70 text-xs uppercase tracking-wider">
-                  @{candidate.handle}
-                </p>
-              </div>
+          {/* Load More */}
+          {candidates.length >= 50 && (
+            <div className="flex justify-center pt-4">
+              <button className="px-8 py-3 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors">
+                Load More Candidates
+              </button>
             </div>
-
-            {/* Info Below Image */}
-            <div className="mt-3 space-y-2">
-              <h3 className="font-medium text-zinc-900 group-hover:text-accent transition-colors">
-                {candidate.name}
-              </h3>
-              <p className="text-sm text-zinc-500">
-                {candidate.location}
-              </p>
-              {/* Compact Dimension Scores */}
-              <ScoreDimensions
-                physical_potential={candidate.physical_potential}
-                unsigned_probability={candidate.unsigned_probability}
-                reachability={candidate.reachability}
-                engagement_health={candidate.engagement_health}
-                vision_analyzed={candidate.vision_analyzed}
-                compact
-              />
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Load More */}
-      <div className="flex justify-center pt-4">
-        <button className="px-8 py-3 rounded-full border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors">
-          Load More Candidates
-        </button>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
