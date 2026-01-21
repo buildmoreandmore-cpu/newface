@@ -12,8 +12,9 @@ import {
 } from 'lucide-react';
 import { CandidateStatusBadge } from './CandidateStatusBadge';
 import { CandidateNotes } from './CandidateNotes';
+import { ScoreDimensions } from '@/components/candidates/ScoreDimensions';
 
-// Extended demo data matching the dashboard
+// Extended demo data matching the dashboard with 4-dimension scores
 const demoCandidates = [
   {
     id: '1',
@@ -27,6 +28,11 @@ const demoCandidates = [
     followers: 245000,
     engagement_rate: 4.8,
     bio: 'Swedish model based in Stockholm. Specializing in high fashion editorials and luxury brand campaigns. Featured in Vogue Scandinavia and Elle Sweden.',
+    vision_analyzed: true,
+    physical_potential: { score: 96, confidence: 92, factors: ['Excellent facial symmetry', 'High fashion aesthetic', 'Professional styling'], notes: 'Strong high fashion potential' },
+    unsigned_probability: { score: 85, confidence: 78, factors: ['No agency mentions', 'Personal email listed'], notes: 'Likely freelance' },
+    reachability: { score: 92, confidence: 88, factors: ['Public contact info', 'Active engagement'], notes: 'Highly reachable' },
+    engagement_health: { score: 89, confidence: 85, factors: ['Healthy engagement rate', 'Authentic comments'], notes: 'Strong organic following' },
   },
   {
     id: '2',
@@ -40,6 +46,11 @@ const demoCandidates = [
     followers: 520000,
     engagement_rate: 6.2,
     bio: 'Shanghai-based model and content creator. Known for contemporary streetwear campaigns and commercial work with leading Asian brands.',
+    vision_analyzed: true,
+    physical_potential: { score: 92, confidence: 90, factors: ['Strong jawline', 'Versatile look', 'Commercial appeal'], notes: 'Great for streetwear' },
+    unsigned_probability: { score: 78, confidence: 72, factors: ['Growing account', 'Independent creator'], notes: 'Possibly has local representation' },
+    reachability: { score: 88, confidence: 82, factors: ['Business email available', 'Active DMs'], notes: 'Open to collaborations' },
+    engagement_health: { score: 94, confidence: 91, factors: ['Viral content', 'High engagement'], notes: 'Excellent audience quality' },
   },
   {
     id: '3',
@@ -53,6 +64,11 @@ const demoCandidates = [
     followers: 178000,
     engagement_rate: 5.4,
     bio: 'Nigerian model and fashion influencer. Passionate about showcasing African fashion on the global stage. Ambassador for sustainable fashion initiatives.',
+    vision_analyzed: true,
+    physical_potential: { score: 90, confidence: 87, factors: ['Striking features', 'Unique look', 'Editorial presence'], notes: 'High fashion editorial potential' },
+    unsigned_probability: { score: 82, confidence: 75, factors: ['No management listed', 'Independent content'], notes: 'Self-represented' },
+    reachability: { score: 85, confidence: 80, factors: ['Website contact form', 'Responds to comments'], notes: 'Moderately accessible' },
+    engagement_health: { score: 88, confidence: 84, factors: ['Authentic engagement', 'Niche audience'], notes: 'Loyal following' },
   },
   {
     id: '4',
@@ -66,6 +82,11 @@ const demoCandidates = [
     followers: 312000,
     engagement_rate: 3.9,
     bio: 'French model represented by Elite Paris. Runway experience with major fashion houses including Dior, Louis Vuitton, and Givenchy.',
+    vision_analyzed: true,
+    physical_potential: { score: 94, confidence: 95, factors: ['Runway proportions', 'High fashion face', 'Professional portfolio'], notes: 'Established model' },
+    unsigned_probability: { score: 15, confidence: 95, factors: ['Agency mentioned', 'Professional management'], notes: 'Already signed to Elite Paris' },
+    reachability: { score: 45, confidence: 90, factors: ['Through agency only', 'No direct contact'], notes: 'Requires agency contact' },
+    engagement_health: { score: 82, confidence: 88, factors: ['Consistent posting', 'Brand collaborations'], notes: 'Professional account' },
   },
   {
     id: '5',
@@ -79,6 +100,11 @@ const demoCandidates = [
     followers: 428000,
     engagement_rate: 7.1,
     bio: 'London-based model and TikTok creator. Combines modeling with beauty content creation. Featured in British Vogue digital campaigns.',
+    vision_analyzed: true,
+    physical_potential: { score: 86, confidence: 83, factors: ['Natural beauty', 'Commercial look', 'Beauty focus'], notes: 'Strong beauty/commercial potential' },
+    unsigned_probability: { score: 88, confidence: 82, factors: ['Creator-focused', 'No agency tags'], notes: 'Likely unsigned' },
+    reachability: { score: 90, confidence: 86, factors: ['Email in bio', 'Collaborates often'], notes: 'Very approachable' },
+    engagement_health: { score: 95, confidence: 92, factors: ['Viral reach', 'Active community'], notes: 'Exceptional engagement' },
   },
   {
     id: '6',
@@ -92,6 +118,11 @@ const demoCandidates = [
     followers: 289000,
     engagement_rate: 5.8,
     bio: 'Tokyo-based model with a unique aesthetic blending traditional and contemporary Japanese fashion. Featured in numerous Japanese fashion magazines.',
+    vision_analyzed: true,
+    physical_potential: { score: 94, confidence: 91, factors: ['Distinctive style', 'Editorial features', 'Unique aesthetic'], notes: 'High editorial potential' },
+    unsigned_probability: { score: 72, confidence: 68, factors: ['Magazine features', 'Professional shots'], notes: 'May have local representation' },
+    reachability: { score: 80, confidence: 75, factors: ['Management email', 'Professional inquiries'], notes: 'Through management' },
+    engagement_health: { score: 91, confidence: 88, factors: ['Quality audience', 'Strong local following'], notes: 'Healthy engagement' },
   },
   {
     id: '7',
@@ -105,6 +136,11 @@ const demoCandidates = [
     followers: 195000,
     engagement_rate: 4.2,
     bio: 'New York model and fitness enthusiast. Specializing in athletic wear and lifestyle campaigns. Former college athlete turned full-time model.',
+    vision_analyzed: true,
+    physical_potential: { score: 88, confidence: 86, factors: ['Athletic build', 'Commercial appeal', 'Fitness focused'], notes: 'Strong fitness/athletic market' },
+    unsigned_probability: { score: 90, confidence: 85, factors: ['Personal branding', 'No agency'], notes: 'Self-managed' },
+    reachability: { score: 92, confidence: 88, factors: ['Email visible', 'Responds quickly'], notes: 'Highly accessible' },
+    engagement_health: { score: 84, confidence: 80, factors: ['Fitness community', 'Steady growth'], notes: 'Solid engagement' },
   },
   {
     id: '8',
@@ -118,6 +154,11 @@ const demoCandidates = [
     followers: 682000,
     engagement_rate: 8.3,
     bio: 'Brazilian model and social media personality. Known for vibrant content and high-energy campaigns. Brand ambassador for major beauty and fashion brands in Latin America.',
+    vision_analyzed: true,
+    physical_potential: { score: 92, confidence: 89, factors: ['Vibrant presence', 'Camera natural', 'Commercial star'], notes: 'Excellent commercial potential' },
+    unsigned_probability: { score: 65, confidence: 70, factors: ['Brand ambassador', 'Professional content'], notes: 'May have local deals' },
+    reachability: { score: 82, confidence: 78, factors: ['Management contact', 'Busy schedule'], notes: 'Through management' },
+    engagement_health: { score: 96, confidence: 94, factors: ['Exceptional engagement', 'Viral content'], notes: 'Top-tier engagement' },
   },
 ];
 
@@ -265,6 +306,17 @@ export default async function CandidateDetailPage({
                 {candidate.platform}
               </Badge>
               <span className="text-sm text-zinc-400">Primary Platform</span>
+            </div>
+
+            {/* AI Analysis Dimensions */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-zinc-100">
+              <ScoreDimensions
+                physical_potential={candidate.physical_potential}
+                unsigned_probability={candidate.unsigned_probability}
+                reachability={candidate.reachability}
+                engagement_health={candidate.engagement_health}
+                vision_analyzed={candidate.vision_analyzed}
+              />
             </div>
           </div>
         </div>

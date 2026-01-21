@@ -23,11 +23,13 @@ import {
   Settings,
   Menu,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Discover', href: '/discover', icon: Sparkles },
   { name: 'Upload', href: '/upload', icon: Upload },
   { name: 'Pipeline', href: '/pipeline', icon: Kanban },
   { name: 'Templates', href: '/templates', icon: MessageSquare },

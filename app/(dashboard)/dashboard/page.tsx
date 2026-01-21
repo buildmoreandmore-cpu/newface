@@ -1,10 +1,20 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import type { Candidate } from '@/types';
+import { ScoreDimensions } from '@/components/candidates/ScoreDimensions';
+import type { Candidate, DimensionScore } from '@/types';
 
-// Demo data with model images
-const demoCandidates: (Partial<Candidate> & { image: string })[] = [
+// Demo data with model images and dimension scores
+interface DemoCandidate extends Partial<Candidate> {
+  image: string;
+  physical_potential?: DimensionScore;
+  unsigned_probability?: DimensionScore;
+  reachability?: DimensionScore;
+  engagement_health?: DimensionScore;
+  vision_analyzed?: boolean;
+}
+
+const demoCandidates: DemoCandidate[] = [
   {
     id: '1',
     name: 'Sofia Andersson',
@@ -14,6 +24,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 94,
     location: 'Stockholm',
     image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 96, confidence: 92, factors: [], notes: '' },
+    unsigned_probability: { score: 85, confidence: 78, factors: [], notes: '' },
+    reachability: { score: 92, confidence: 88, factors: [], notes: '' },
+    engagement_health: { score: 89, confidence: 85, factors: [], notes: '' },
   },
   {
     id: '2',
@@ -24,6 +39,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 91,
     location: 'Shanghai',
     image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 92, confidence: 90, factors: [], notes: '' },
+    unsigned_probability: { score: 78, confidence: 72, factors: [], notes: '' },
+    reachability: { score: 88, confidence: 82, factors: [], notes: '' },
+    engagement_health: { score: 94, confidence: 91, factors: [], notes: '' },
   },
   {
     id: '3',
@@ -34,6 +54,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 89,
     location: 'Lagos',
     image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 90, confidence: 87, factors: [], notes: '' },
+    unsigned_probability: { score: 82, confidence: 75, factors: [], notes: '' },
+    reachability: { score: 85, confidence: 80, factors: [], notes: '' },
+    engagement_health: { score: 88, confidence: 84, factors: [], notes: '' },
   },
   {
     id: '4',
@@ -44,6 +69,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 87,
     location: 'Paris',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 94, confidence: 95, factors: [], notes: '' },
+    unsigned_probability: { score: 15, confidence: 95, factors: [], notes: '' },
+    reachability: { score: 45, confidence: 90, factors: [], notes: '' },
+    engagement_health: { score: 82, confidence: 88, factors: [], notes: '' },
   },
   {
     id: '5',
@@ -54,6 +84,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 85,
     location: 'London',
     image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 86, confidence: 83, factors: [], notes: '' },
+    unsigned_probability: { score: 88, confidence: 82, factors: [], notes: '' },
+    reachability: { score: 90, confidence: 86, factors: [], notes: '' },
+    engagement_health: { score: 95, confidence: 92, factors: [], notes: '' },
   },
   {
     id: '6',
@@ -64,6 +99,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 92,
     location: 'Tokyo',
     image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 94, confidence: 91, factors: [], notes: '' },
+    unsigned_probability: { score: 72, confidence: 68, factors: [], notes: '' },
+    reachability: { score: 80, confidence: 75, factors: [], notes: '' },
+    engagement_health: { score: 91, confidence: 88, factors: [], notes: '' },
   },
   {
     id: '7',
@@ -74,6 +114,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 88,
     location: 'New York',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 88, confidence: 86, factors: [], notes: '' },
+    unsigned_probability: { score: 90, confidence: 85, factors: [], notes: '' },
+    reachability: { score: 92, confidence: 88, factors: [], notes: '' },
+    engagement_health: { score: 84, confidence: 80, factors: [], notes: '' },
   },
   {
     id: '8',
@@ -84,6 +129,11 @@ const demoCandidates: (Partial<Candidate> & { image: string })[] = [
     ai_score: 90,
     location: 'São Paulo',
     image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop',
+    vision_analyzed: true,
+    physical_potential: { score: 92, confidence: 89, factors: [], notes: '' },
+    unsigned_probability: { score: 65, confidence: 70, factors: [], notes: '' },
+    reachability: { score: 82, confidence: 78, factors: [], notes: '' },
+    engagement_health: { score: 96, confidence: 94, factors: [], notes: '' },
   },
 ];
 
@@ -174,13 +224,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Info Below Image */}
-            <div className="mt-3 space-y-1">
+            <div className="mt-3 space-y-2">
               <h3 className="font-medium text-zinc-900 group-hover:text-accent transition-colors">
                 {candidate.name}
               </h3>
               <p className="text-sm text-zinc-500">
                 {candidate.location}
               </p>
+              {/* Compact Dimension Scores */}
+              <ScoreDimensions
+                physical_potential={candidate.physical_potential}
+                unsigned_probability={candidate.unsigned_probability}
+                reachability={candidate.reachability}
+                engagement_health={candidate.engagement_health}
+                vision_analyzed={candidate.vision_analyzed}
+                compact
+              />
             </div>
           </Link>
         ))}
