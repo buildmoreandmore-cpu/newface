@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { ScoreDimensions } from '@/components/candidates/ScoreDimensions';
@@ -99,11 +98,10 @@ export default async function DashboardPage() {
                 {/* Image Container */}
                 <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-100">
                   {candidate.avatar_url ? (
-                    <Image
+                    <img
                       src={candidate.avatar_url}
                       alt={candidate.name || ''}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-zinc-200">

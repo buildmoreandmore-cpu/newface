@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -88,12 +87,10 @@ export default async function CandidateDetailPage({
           {/* Photo */}
           <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-zinc-100 shadow-xl">
             {candidate.avatar_url ? (
-              <Image
+              <img
                 src={candidate.avatar_url}
                 alt={candidate.name}
-                fill
-                priority
-                className="object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-200">
