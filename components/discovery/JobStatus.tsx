@@ -15,6 +15,7 @@ import {
   MapPin,
   User,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { DiscoveryJob } from '@/types';
@@ -22,16 +23,29 @@ import type { DiscoveryJob } from '@/types';
 interface JobStatusProps {
   jobs: DiscoveryJob[];
   onRefresh?: () => void;
+  onDelete?: (jobId: string) => void;
 }
 
-export function JobStatus({ jobs, onRefresh }: JobStatusProps) {
+export function JobStatus({ jobs, onRefresh, onDelete }: JobStatusProps) {
   const [now, setNow] = useState(new Date());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Update time every second for relative timestamps
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleDelete = async (jobId: string) => {
+    setDeletingId(jobId);
+    try {
+      if (onDelete) {
+        await onDelete(jobId);
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const getStatusBadge = (status: DiscoveryJob['status']) => {
     switch (status) {
@@ -157,7 +171,24 @@ export function JobStatus({ jobs, onRefresh }: JobStatusProps) {
                   </p>
                 </div>
               </div>
-              {getStatusBadge(job.status)}
+              <div className="flex items-center gap-2">
+                {getStatusBadge(job.status)}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(job.id)}
+                    disabled={deletingId === job.id}
+                    className="h-8 w-8 p-0 text-zinc-400 hover:text-red-500"
+                  >
+                    {deletingId === job.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Progress bar for running jobs */}

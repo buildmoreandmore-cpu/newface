@@ -95,6 +95,24 @@ export default function DiscoverPage() {
     }
   };
 
+  // Delete a job
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/discovery/${jobId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete job');
+      }
+
+      // Refresh jobs list
+      await fetchJobs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete job');
+    }
+  };
+
   // Calculate stats
   const totalDiscovered = jobs.reduce((sum, job) => sum + job.candidates_found, 0);
   const totalAnalyzed = jobs.reduce((sum, job) => sum + job.candidates_analyzed, 0);
@@ -165,7 +183,7 @@ export default function DiscoverPage() {
         <DiscoveryForm onSubmit={handleStartDiscovery} isLoading={isLoading} />
 
         {/* Job Status */}
-        <JobStatus jobs={jobs} onRefresh={fetchJobs} />
+        <JobStatus jobs={jobs} onRefresh={fetchJobs} onDelete={handleDeleteJob} />
       </div>
 
       {/* Error Message */}
