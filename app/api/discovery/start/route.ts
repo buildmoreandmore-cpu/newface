@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApifyClient } from 'apify-client';
 import { analyzeCandidate, extractDimensionScores } from '@/lib/ai/analyze';
+import { proxyImageToStorage } from '@/lib/storage/image-proxy';
 import type { StartDiscoveryRequest, ApifyProfile } from '@/types';
 
 // Configure for longer timeout
@@ -198,11 +199,17 @@ export async function POST(request: Request) {
 
           if (existing) continue;
 
-          // Analyze with AI
-          const { score, analysis } = await analyzeCandidate(profile);
+          // Proxy the image to Supabase Storage (run in parallel with AI analysis)
+          const [imageResult, analysisResult] = await Promise.all([
+            proxyImageToStorage(profile.profilePicUrl, profile.username, platform),
+            analyzeCandidate(profile),
+          ]);
+
+          const proxiedImageUrl = imageResult;
+          const { score, analysis } = analysisResult;
           const dimensionScores = extractDimensionScores(analysis);
 
-          // Save candidate
+          // Save candidate with proxied image URL
           await supabase.from('candidates').insert({
             user_id: user.id,
             name: profile.fullName || profile.username,
@@ -211,7 +218,7 @@ export async function POST(request: Request) {
             profile_url: platform === 'instagram'
               ? `https://instagram.com/${profile.username}`
               : `https://tiktok.com/@${profile.username}`,
-            avatar_url: profile.profilePicUrl,
+            avatar_url: proxiedImageUrl || profile.profilePicUrl,
             bio: profile.biography,
             followers: profile.followersCount,
             engagement_rate: profile.engagementRate,
