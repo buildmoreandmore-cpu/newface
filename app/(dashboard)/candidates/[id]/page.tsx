@@ -140,7 +140,6 @@ export default async function CandidateDetailPage({
             {/* Status and Score */}
             <div className="flex flex-wrap items-center gap-3">
               <CandidateStatusBadge
-                candidateId={candidate.id}
                 currentStatus={candidate.status}
                 statusColors={statusColors}
               />
