@@ -15,49 +15,41 @@ function getApifyClient() {
   return new ApifyClient({ token });
 }
 
-// Normalize Instagram profile data
+// Normalize Instagram post data to profile (hashtag scraper returns posts, not profiles)
 function normalizeInstagramProfile(item: Record<string, unknown>): ApifyProfile | null {
   try {
-    // Handle different data structures from Apify
-    const username = String(item.username || item.ownerUsername || '');
+    // Hashtag scraper returns posts with owner info
+    const username = String(item.ownerUsername || item.username || '');
     if (!username) return null;
 
-    const posts = (item.latestPosts || item.posts || []) as Record<string, unknown>[];
-    const followers = Number(item.followersCount || item.subscribersCount || 0);
-
-    // Calculate engagement
-    let engagementRate = 0;
-    if (posts.length > 0 && followers > 0) {
-      const totalEngagement = posts.slice(0, 10).reduce((sum, p) => {
-        return sum + (Number(p.likesCount) || 0) + (Number(p.commentsCount) || 0);
-      }, 0);
-      engagementRate = Math.round((totalEngagement / posts.length / followers) * 100 * 100) / 100;
-    }
+    // Get post engagement to estimate profile quality
+    const likesCount = Number(item.likesCount) || 0;
+    const commentsCount = Number(item.commentsCount) || 0;
 
     return {
       username,
-      fullName: String(item.fullName || item.ownerFullName || username),
-      biography: String(item.biography || item.bio || ''),
-      profilePicUrl: String(item.profilePicUrl || item.profilePicUrlHD || item.ownerProfilePicUrl || ''),
-      followersCount: followers,
-      followingCount: Number(item.followsCount || item.followingCount || 0),
-      postsCount: Number(item.postsCount || item.mediaCount || 0),
-      engagementRate,
-      isVerified: Boolean(item.verified || item.isVerified),
-      isBusinessAccount: Boolean(item.isBusinessAccount),
-      externalUrl: item.externalUrl ? String(item.externalUrl) : null,
-      email: item.businessEmail ? String(item.businessEmail) : null,
-      phone: item.businessPhoneNumber ? String(item.businessPhoneNumber) : null,
-      location: item.businessAddress ? String(item.businessAddress) : null,
-      recentPosts: posts.slice(0, 5).map((p) => ({
-        id: String(p.id || ''),
-        url: String(p.url || ''),
-        imageUrl: String(p.displayUrl || p.imageUrl || ''),
-        caption: String(p.caption || ''),
-        likesCount: Number(p.likesCount) || 0,
-        commentsCount: Number(p.commentsCount) || 0,
-        timestamp: String(p.timestamp || ''),
-      })),
+      fullName: String(item.ownerFullName || username),
+      biography: '', // Not available from hashtag scraper
+      profilePicUrl: String(item.displayUrl || ''), // Use post image as preview
+      followersCount: 0, // Not available from hashtag scraper
+      followingCount: 0,
+      postsCount: 0,
+      engagementRate: 0,
+      isVerified: false,
+      isBusinessAccount: false,
+      externalUrl: null,
+      email: null,
+      phone: null,
+      location: item.locationName ? String(item.locationName) : null,
+      recentPosts: [{
+        id: String(item.id || ''),
+        url: String(item.url || `https://instagram.com/p/${item.shortCode}`),
+        imageUrl: String(item.displayUrl || ''),
+        caption: String(item.caption || ''),
+        likesCount,
+        commentsCount,
+        timestamp: String(item.timestamp || ''),
+      }],
     };
   } catch {
     return null;
