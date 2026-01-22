@@ -7,8 +7,8 @@ import { DiscoveryForm } from '@/components/discovery/DiscoveryForm';
 import { JobStatus } from '@/components/discovery/JobStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, TrendingUp, Users, Eye } from 'lucide-react';
-import type { DiscoveryJob, DiscoveryPlatform, SearchType } from '@/types';
+import { Sparkles, TrendingUp, Users, Eye, Target } from 'lucide-react';
+import type { DiscoveryJob, EnhancedDiscoveryRequest } from '@/types';
 
 export default function DiscoverPage() {
   const [jobs, setJobs] = useState<DiscoveryJob[]>([]);
@@ -57,13 +57,8 @@ export default function DiscoverPage() {
     };
   }, [fetchJobs, supabase]);
 
-  // Start a new discovery job
-  const handleStartDiscovery = async (data: {
-    platform: DiscoveryPlatform;
-    search_type: SearchType;
-    search_query: string;
-    limit: number;
-  }) => {
+  // Start a new discovery job (enhanced)
+  const handleStartDiscovery = async (data: EnhancedDiscoveryRequest) => {
     setIsLoading(true);
     setError(null);
 
@@ -95,6 +90,17 @@ export default function DiscoverPage() {
     }
   };
 
+  // Quick search with a single hashtag (for suggested searches)
+  const handleQuickSearch = (hashtag: string) => {
+    handleStartDiscovery({
+      platforms: 'instagram',
+      search_type: 'hashtag',
+      hashtags: [hashtag],
+      limit: 50,
+      street_casting_mode: false,
+    });
+  };
+
   // Delete a job
   const handleDeleteJob = async (jobId: string) => {
     try {
@@ -117,7 +123,7 @@ export default function DiscoverPage() {
   const totalDiscovered = jobs.reduce((sum, job) => sum + job.candidates_found, 0);
   const totalAnalyzed = jobs.reduce((sum, job) => sum + job.candidates_analyzed, 0);
   const runningJobs = jobs.filter((job) => job.status === 'running').length;
-  const completedJobs = jobs.filter((job) => job.status === 'completed').length;
+  const streetCastingJobs = jobs.filter((job) => job.street_casting_mode).length;
 
   return (
     <div className="space-y-6">
@@ -167,11 +173,11 @@ export default function DiscoverPage() {
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+              <Target className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-zinc-900">{completedJobs}</p>
-              <p className="text-sm text-zinc-500">Completed</p>
+              <p className="text-2xl font-bold text-zinc-900">{streetCastingJobs}</p>
+              <p className="text-sm text-zinc-500">Street Casting</p>
             </div>
           </CardContent>
         </Card>
@@ -201,37 +207,55 @@ export default function DiscoverPage() {
           <CardTitle className="text-lg">Suggested Searches</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {[
-              'newface',
-              'modellife',
-              'aspiringmodel',
-              'modelsearch',
-              'freshface',
-              'undiscovered',
-              'nextmodel',
-              'modelscout',
-              'streetstyle',
-              'editorialmodel',
-              'fashionweek',
-              'castingcall',
-            ].map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="cursor-pointer bg-zinc-100 hover:bg-accent/10 hover:text-accent"
-                onClick={() => {
-                  handleStartDiscovery({
-                    platform: 'instagram',
-                    search_type: 'hashtag',
-                    search_query: tag,
-                    limit: 50,
-                  });
-                }}
-              >
-                #{tag}
-              </Badge>
-            ))}
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-zinc-700 mb-2">Street Casting</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'newfaces',
+                  'streetcasting',
+                  'facesofnyc',
+                  'editorialportrait',
+                  'digitalsonly',
+                  'rawbeauty',
+                  'modelscout',
+                ].map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="cursor-pointer bg-accent/10 text-accent hover:bg-accent/20"
+                    onClick={() => handleQuickSearch(tag)}
+                  >
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-700 mb-2">General Discovery</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'modellife',
+                  'aspiringmodel',
+                  'modelsearch',
+                  'freshface',
+                  'undiscovered',
+                  'nextmodel',
+                  'streetstyle',
+                  'fashionweek',
+                  'castingcall',
+                ].map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="cursor-pointer bg-zinc-100 hover:bg-accent/10 hover:text-accent"
+                    onClick={() => handleQuickSearch(tag)}
+                  >
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

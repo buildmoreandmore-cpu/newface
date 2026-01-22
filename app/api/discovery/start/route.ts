@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ApifyClient } from 'apify-client';
-import { analyzeCandidate, extractDimensionScores } from '@/lib/ai/analyze';
+import { analyzeCandidate, analyzeForStreetCasting, extractDimensionScores, extractStreetCastingScores } from '@/lib/ai/analyze';
 import { proxyImageToStorage } from '@/lib/storage/image-proxy';
-import type { StartDiscoveryRequest, ApifyProfile } from '@/types';
+import type {
+  EnhancedDiscoveryRequest,
+  ApifyProfile,
+  DiscoveryPlatform,
+  StreetCastingFilters,
+} from '@/types';
 
 // Configure for longer timeout
-export const maxDuration = 60; // 60 seconds max
+export const maxDuration = 120; // 2 minutes for parallel operations
 
 function getApifyClient() {
   const token = process.env.APIFY_API_TOKEN;
@@ -91,6 +96,106 @@ function normalizeTikTokProfile(item: Record<string, unknown>): ApifyProfile | n
   }
 }
 
+// Apply filters to scraped profiles
+function applyFilters(
+  profiles: ApifyProfile[],
+  filters: StreetCastingFilters | undefined
+): ApifyProfile[] {
+  if (!filters) return profiles;
+
+  return profiles.filter((profile) => {
+    // Filter by follower range (if we have follower data)
+    if (profile.followersCount > 0) {
+      const [minFollowers, maxFollowers] = filters.followerRange;
+      if (profile.followersCount < minFollowers || profile.followersCount > maxFollowers) {
+        return false;
+      }
+    }
+
+    // Filter by max engagement rate (if we have engagement data)
+    if (profile.engagementRate > 0 && profile.engagementRate > filters.maxEngagementRate) {
+      return false;
+    }
+
+    // Filter by cities (if specified and we have location data)
+    if (filters.cities.length > 0 && profile.location) {
+      const locationLower = profile.location.toLowerCase();
+      const cityMatches = filters.cities.some((city) => {
+        const cityPatterns: Record<string, string[]> = {
+          NYC: ['new york', 'nyc', 'brooklyn', 'manhattan', 'queens', 'bronx'],
+          LA: ['los angeles', 'la', 'hollywood', 'beverly hills', 'santa monica'],
+          Chicago: ['chicago', 'chi-town'],
+          Atlanta: ['atlanta', 'atl'],
+        };
+        return cityPatterns[city]?.some((pattern) => locationLower.includes(pattern));
+      });
+      if (!cityMatches) return false;
+    }
+
+    return true;
+  });
+}
+
+// Scrape a single platform
+async function scrapeHashtags(
+  client: ApifyClient,
+  platform: DiscoveryPlatform,
+  hashtags: string[],
+  limit: number
+): Promise<ApifyProfile[]> {
+  const profiles: ApifyProfile[] = [];
+  const seenUsernames = new Set<string>();
+
+  // Process each hashtag
+  for (const hashtag of hashtags) {
+    const cleanHashtag = hashtag.replace(/^#/, '');
+
+    try {
+      if (platform === 'instagram') {
+        const run = await client.actor('apify/instagram-hashtag-scraper').call({
+          hashtags: [cleanHashtag],
+          resultsLimit: Math.min(Math.ceil(limit / hashtags.length), 30),
+        }, {
+          waitSecs: 120,
+        });
+
+        const { items } = await client.dataset(run.defaultDatasetId).listItems();
+
+        for (const item of items as Record<string, unknown>[]) {
+          const profile = normalizeInstagramProfile(item);
+          if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
+            seenUsernames.add(profile.username.toLowerCase());
+            profiles.push(profile);
+          }
+        }
+      } else {
+        const run = await client.actor('clockworks/tiktok-scraper').call({
+          hashtags: [cleanHashtag],
+          resultsPerPage: Math.min(Math.ceil(limit / hashtags.length), 30),
+          shouldDownloadVideos: false,
+          shouldDownloadCovers: false,
+        }, {
+          waitSecs: 120,
+        });
+
+        const { items } = await client.dataset(run.defaultDatasetId).listItems();
+
+        for (const item of items as Record<string, unknown>[]) {
+          const profile = normalizeTikTokProfile(item);
+          if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
+            seenUsernames.add(profile.username.toLowerCase());
+            profiles.push(profile);
+          }
+        }
+      }
+    } catch (err) {
+      console.error(`Error scraping ${platform} hashtag #${cleanHashtag}:`, err);
+    }
+  }
+
+  return profiles;
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
 
@@ -101,25 +206,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: StartDiscoveryRequest = await request.json();
-    const { platform, search_type, search_query, limit = 25 } = body;
+    const body: EnhancedDiscoveryRequest = await request.json();
+    const {
+      platforms,
+      search_type,
+      hashtags,
+      limit = 25,
+      street_casting_mode = false,
+      filters,
+    } = body;
 
-    if (!platform || !search_type || !search_query) {
+    // Validate required fields
+    if (!platforms || !search_type || !hashtags || hashtags.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields (platforms, search_type, hashtags)' },
         { status: 400 }
       );
     }
 
-    // Create job record
+    // Determine which platforms to search
+    const platformsToSearch: DiscoveryPlatform[] =
+      platforms === 'both' ? ['instagram', 'tiktok'] : [platforms];
+
+    // Create job record with enhanced fields
     const { data: job, error: jobError } = await supabase
       .from('discovery_jobs')
       .insert({
         user_id: user.id,
-        platform,
+        platform: platforms === 'both' ? 'instagram' : platforms, // Primary platform for backwards compat
         search_type,
-        search_query,
+        search_query: hashtags.join(', '),
         status: 'running',
+        filters: filters || null,
+        hashtags,
+        platforms_searched: platformsToSearch,
+        street_casting_mode,
       })
       .select()
       .single();
@@ -130,62 +251,42 @@ export async function POST(request: Request) {
     }
 
     const client = getApifyClient();
-    let profiles: ApifyProfile[] = [];
 
     try {
-      // Run the appropriate Apify actor
-      if (platform === 'instagram') {
-        // Use Instagram Hashtag Scraper
-        const run = await client.actor('apify/instagram-hashtag-scraper').call({
-          hashtags: [search_query.replace(/^#/, '')],
-          resultsLimit: Math.min(limit, 30), // Keep small for speed
-        }, {
-          waitSecs: 120, // Wait up to 2 minutes
-        });
+      // Scrape platforms in parallel if searching both
+      let allProfiles: ApifyProfile[] = [];
 
-        const { items } = await client.dataset(run.defaultDatasetId).listItems();
-
-        // Extract unique profiles from posts
-        const seenUsernames = new Set<string>();
-        for (const item of items as Record<string, unknown>[]) {
-          const profile = normalizeInstagramProfile(item);
-          if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
-            seenUsernames.add(profile.username.toLowerCase());
-            profiles.push(profile);
-          }
-        }
+      if (platforms === 'both') {
+        const [instagramProfiles, tiktokProfiles] = await Promise.all([
+          scrapeHashtags(client, 'instagram', hashtags, Math.ceil(limit / 2)),
+          scrapeHashtags(client, 'tiktok', hashtags, Math.ceil(limit / 2)),
+        ]);
+        allProfiles = [...instagramProfiles, ...tiktokProfiles];
       } else {
-        // Use TikTok Scraper
-        const run = await client.actor('clockworks/tiktok-scraper').call({
-          hashtags: [search_query.replace(/^#/, '')],
-          resultsPerPage: Math.min(limit, 30),
-          shouldDownloadVideos: false,
-          shouldDownloadCovers: false,
-        }, {
-          waitSecs: 120,
-        });
-
-        const { items } = await client.dataset(run.defaultDatasetId).listItems();
-
-        const seenUsernames = new Set<string>();
-        for (const item of items as Record<string, unknown>[]) {
-          const profile = normalizeTikTokProfile(item);
-          if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
-            seenUsernames.add(profile.username.toLowerCase());
-            profiles.push(profile);
-          }
-        }
+        allProfiles = await scrapeHashtags(client, platforms, hashtags, limit);
       }
+
+      // Deduplicate across platforms by username
+      const seenUsernames = new Set<string>();
+      const uniqueProfiles = allProfiles.filter((profile) => {
+        const lowerUsername = profile.username.toLowerCase();
+        if (seenUsernames.has(lowerUsername)) return false;
+        seenUsernames.add(lowerUsername);
+        return true;
+      });
+
+      // Apply filters if provided
+      const filteredProfiles = applyFilters(uniqueProfiles, filters);
 
       // Update job with found count
       await supabase
         .from('discovery_jobs')
-        .update({ candidates_found: profiles.length })
+        .update({ candidates_found: filteredProfiles.length })
         .eq('id', job.id);
 
-      // Analyze and save profiles (limit to first 10 for speed)
+      // Analyze and save profiles (limit to first 10 for speed, can be increased)
       let analyzedCount = 0;
-      const profilesToAnalyze = profiles.slice(0, 10);
+      const profilesToAnalyze = filteredProfiles.slice(0, 10);
 
       for (const profile of profilesToAnalyze) {
         try {
@@ -199,23 +300,36 @@ export async function POST(request: Request) {
 
           if (existing) continue;
 
-          // Proxy the image to Supabase Storage (run in parallel with AI analysis)
+          // Determine platform for this profile
+          const candidatePlatform: DiscoveryPlatform =
+            profile.recentPosts.length > 0 && profile.recentPosts[0].url?.includes('instagram')
+              ? 'instagram'
+              : 'tiktok';
+
+          // Proxy the image and run AI analysis in parallel
           const [imageResult, analysisResult] = await Promise.all([
-            proxyImageToStorage(profile.profilePicUrl, profile.username, platform),
-            analyzeCandidate(profile),
+            proxyImageToStorage(profile.profilePicUrl, profile.username, candidatePlatform),
+            street_casting_mode
+              ? analyzeForStreetCasting(profile, filters)
+              : analyzeCandidate(profile),
           ]);
 
           const proxiedImageUrl = imageResult;
           const { score, analysis } = analysisResult;
           const dimensionScores = extractDimensionScores(analysis);
 
+          // Extract street casting scores if in street casting mode
+          const streetCastingScores = street_casting_mode
+            ? extractStreetCastingScores(analysis)
+            : {};
+
           // Save candidate with proxied image URL
           await supabase.from('candidates').insert({
             user_id: user.id,
             name: profile.fullName || profile.username,
             handle: profile.username,
-            platform,
-            profile_url: platform === 'instagram'
+            platform: candidatePlatform,
+            profile_url: candidatePlatform === 'instagram'
               ? `https://instagram.com/${profile.username}`
               : `https://tiktok.com/@${profile.username}`,
             avatar_url: proxiedImageUrl || profile.profilePicUrl,
@@ -228,6 +342,7 @@ export async function POST(request: Request) {
             status: 'discovered',
             discovery_job_id: job.id,
             ...dimensionScores,
+            ...streetCastingScores,
           });
 
           analyzedCount++;
@@ -241,7 +356,7 @@ export async function POST(request: Request) {
         .from('discovery_jobs')
         .update({
           status: 'completed',
-          candidates_found: profiles.length,
+          candidates_found: filteredProfiles.length,
           candidates_analyzed: analyzedCount,
           completed_at: new Date().toISOString(),
         })
@@ -250,8 +365,11 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         job_id: job.id,
-        candidates_found: profiles.length,
+        platforms_searched: platformsToSearch,
+        hashtags_searched: hashtags,
+        candidates_found: filteredProfiles.length,
         candidates_analyzed: analyzedCount,
+        street_casting_mode,
       });
 
     } catch (apifyError) {

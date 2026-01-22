@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -12,59 +12,103 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Instagram, Music2, Hash, MapPin, User, Loader2, Search } from 'lucide-react';
-import type { DiscoveryPlatform, SearchType } from '@/types';
+import {
+  Instagram,
+  Music2,
+  Hash,
+  MapPin,
+  User,
+  Loader2,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Users,
+} from 'lucide-react';
+import { HashtagInput } from './HashtagInput';
+import { RangeFilter, SingleValueFilter } from './RangeFilter';
+import type {
+  DiscoveryPlatformOption,
+  SearchType,
+  TargetCity,
+  StreetCastingFilters,
+  EnhancedDiscoveryRequest,
+} from '@/types';
+import { STREET_CASTING_PRESETS, STREET_CASTING_HASHTAGS } from '@/types';
 
 interface DiscoveryFormProps {
-  onSubmit: (data: {
-    platform: DiscoveryPlatform;
-    search_type: SearchType;
-    search_query: string;
-    limit: number;
-  }) => Promise<void>;
+  onSubmit: (data: EnhancedDiscoveryRequest) => Promise<void>;
   isLoading?: boolean;
 }
 
+const TARGET_CITIES: { value: TargetCity; label: string }[] = [
+  { value: 'NYC', label: 'New York City' },
+  { value: 'LA', label: 'Los Angeles' },
+  { value: 'Chicago', label: 'Chicago' },
+  { value: 'Atlanta', label: 'Atlanta' },
+];
+
 export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProps) {
-  const [platform, setPlatform] = useState<DiscoveryPlatform>('instagram');
+  const [platforms, setPlatforms] = useState<DiscoveryPlatformOption>('instagram');
   const [searchType, setSearchType] = useState<SearchType>('hashtag');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [hashtags, setHashtags] = useState<string[]>([]);
   const [limit, setLimit] = useState(50);
+  const [streetCastingMode, setStreetCastingMode] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Filters
+  const [filters, setFilters] = useState<StreetCastingFilters>({
+    followerRange: [1000, 50000],
+    maxEngagementRate: 10,
+    cities: [],
+    ageRange: [18, 35],
+    preferUnpolished: false,
+  });
+
+  // Apply Street Casting presets when toggled on
+  useEffect(() => {
+    if (streetCastingMode) {
+      setPlatforms('both');
+      setHashtags([...STREET_CASTING_HASHTAGS]);
+      setFilters({ ...STREET_CASTING_PRESETS });
+      setShowAdvanced(true);
+    }
+  }, [streetCastingMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (hashtags.length === 0) return;
 
     await onSubmit({
-      platform,
+      platforms,
       search_type: searchType,
-      search_query: searchQuery.trim(),
+      hashtags,
       limit,
+      street_casting_mode: streetCastingMode,
+      filters: showAdvanced ? filters : undefined,
     });
   };
 
-  const getPlaceholder = () => {
-    switch (searchType) {
-      case 'hashtag':
-        return platform === 'instagram' ? 'model, nyfw, streetstyle' : 'fyp, fashion, model';
-      case 'location':
-        return 'New York, Los Angeles, Miami';
-      case 'profile':
-        return '@username1, @username2';
-      default:
-        return 'Enter search query...';
-    }
+  const updateFilter = <K extends keyof StreetCastingFilters>(
+    key: K,
+    value: StreetCastingFilters[K]
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const getSearchIcon = () => {
-    switch (searchType) {
-      case 'hashtag':
-        return <Hash className="h-4 w-4" />;
-      case 'location':
-        return <MapPin className="h-4 w-4" />;
-      case 'profile':
-        return <User className="h-4 w-4" />;
-    }
+  const toggleCity = (city: TargetCity) => {
+    setFilters((prev) => ({
+      ...prev,
+      cities: prev.cities.includes(city)
+        ? prev.cities.filter((c) => c !== city)
+        : [...prev.cities, city],
+    }));
+  };
+
+  const formatFollowers = (n: number) => {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(0)}K`;
+    return n.toString();
   };
 
   return (
@@ -80,15 +124,35 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Street Casting Mode Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-lg border border-accent/20">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-accent" />
+              <div>
+                <Label htmlFor="street-casting" className="font-semibold">
+                  Street Casting Mode
+                </Label>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Optimized for finding raw, undiscovered talent
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="street-casting"
+              checked={streetCastingMode}
+              onCheckedChange={setStreetCastingMode}
+            />
+          </div>
+
           {/* Platform Selection */}
           <div className="space-y-2">
             <Label>Platform</Label>
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setPlatform('instagram')}
+                onClick={() => setPlatforms('instagram')}
                 className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                  platform === 'instagram'
+                  platforms === 'instagram'
                     ? 'border-accent bg-accent/5 text-accent'
                     : 'border-zinc-200 hover:border-zinc-300'
                 }`}
@@ -98,15 +162,27 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
               </button>
               <button
                 type="button"
-                onClick={() => setPlatform('tiktok')}
+                onClick={() => setPlatforms('tiktok')}
                 className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                  platform === 'tiktok'
+                  platforms === 'tiktok'
                     ? 'border-accent bg-accent/5 text-accent'
                     : 'border-zinc-200 hover:border-zinc-300'
                 }`}
               >
                 <Music2 className="h-5 w-5" />
                 <span className="font-medium">TikTok</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlatforms('both')}
+                className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                  platforms === 'both'
+                    ? 'border-accent bg-accent/5 text-accent'
+                    : 'border-zinc-200 hover:border-zinc-300'
+                }`}
+              >
+                <Users className="h-5 w-5" />
+                <span className="font-medium">Both</span>
               </button>
             </div>
           </div>
@@ -144,25 +220,15 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
             </Select>
           </div>
 
-          {/* Search Query */}
+          {/* Hashtag Input */}
           <div className="space-y-2">
-            <Label>Search Query</Label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
-                {getSearchIcon()}
-              </div>
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={getPlaceholder()}
-                className="pl-10"
-              />
-            </div>
-            <p className="text-xs text-zinc-500">
-              {searchType === 'hashtag' && 'Enter hashtags without the # symbol'}
-              {searchType === 'location' && 'Enter city names or location tags'}
-              {searchType === 'profile' && 'Enter usernames without the @ symbol'}
-            </p>
+            <Label>Hashtags to Search</Label>
+            <HashtagInput
+              hashtags={hashtags}
+              onChange={setHashtags}
+              placeholder="Enter hashtags without #"
+              maxTags={10}
+            />
           </div>
 
           {/* Result Limit */}
@@ -184,24 +250,127 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
             </Select>
           </div>
 
+          {/* Advanced Filters Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+          >
+            {showAdvanced ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+            Advanced Filters
+          </button>
+
+          {/* Advanced Filters Section */}
+          {showAdvanced && (
+            <div className="space-y-6 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+              {/* Target Cities */}
+              <div className="space-y-3">
+                <Label>Target Cities</Label>
+                <div className="flex flex-wrap gap-2">
+                  {TARGET_CITIES.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => toggleCity(value)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                        filters.cities.includes(value)
+                          ? 'bg-accent text-white'
+                          : 'bg-white border border-zinc-200 hover:border-accent/50'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Filter candidates by location (optional)
+                </p>
+              </div>
+
+              {/* Follower Range */}
+              <RangeFilter
+                label="Follower Range"
+                value={filters.followerRange}
+                onChange={(value) => updateFilter('followerRange', value)}
+                min={0}
+                max={100000}
+                step={500}
+                formatValue={formatFollowers}
+                description="Filter by follower count to find truly undiscovered talent"
+              />
+
+              {/* Max Engagement Rate */}
+              <SingleValueFilter
+                label="Max Engagement Rate"
+                value={filters.maxEngagementRate}
+                onChange={(value) => updateFilter('maxEngagementRate', value)}
+                min={0.5}
+                max={20}
+                step={0.5}
+                formatValue={(v) => `${v}%`}
+                description="Lower engagement often indicates authentic, non-influencer accounts"
+              />
+
+              {/* Age Range */}
+              <RangeFilter
+                label="Target Age Range"
+                value={filters.ageRange}
+                onChange={(value) => updateFilter('ageRange', value)}
+                min={16}
+                max={45}
+                step={1}
+                formatValue={(v) => `${v}`}
+                description="AI will estimate age from profile images"
+              />
+
+              {/* Prefer Unpolished Toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="prefer-unpolished">Prefer Unpolished Content</Label>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Score iPhone/candid shots higher than professional photos
+                  </p>
+                </div>
+                <Switch
+                  id="prefer-unpolished"
+                  checked={filters.preferUnpolished}
+                  onCheckedChange={(checked) =>
+                    updateFilter('preferUnpolished', checked)
+                  }
+                />
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <Button
             type="submit"
             className="w-full bg-accent hover:bg-accent/90"
-            disabled={isLoading || !searchQuery.trim()}
+            disabled={isLoading || hashtags.length === 0}
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Starting Discovery...
+                {platforms === 'both' ? 'Searching Both Platforms...' : 'Starting Discovery...'}
               </>
             ) : (
               <>
                 <Search className="mr-2 h-4 w-4" />
-                Start Discovery
+                {streetCastingMode ? 'Start Street Casting' : 'Start Discovery'}
               </>
             )}
           </Button>
+
+          {/* Helper Text */}
+          {hashtags.length === 0 && (
+            <p className="text-center text-sm text-amber-600">
+              Add at least one hashtag to start discovery
+            </p>
+          )}
         </form>
       </CardContent>
     </Card>

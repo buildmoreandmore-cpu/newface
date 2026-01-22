@@ -9,8 +9,36 @@ export type CandidateStatus =
 export type Platform = 'instagram' | 'tiktok' | 'linkedin' | 'other';
 
 export type DiscoveryPlatform = 'instagram' | 'tiktok';
+export type DiscoveryPlatformOption = 'instagram' | 'tiktok' | 'both';
 export type SearchType = 'hashtag' | 'location' | 'profile';
 export type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
+export type TargetCity = 'NYC' | 'LA' | 'Chicago' | 'Atlanta';
+
+// Street Casting filter configuration
+export interface StreetCastingFilters {
+  followerRange: [number, number];
+  maxEngagementRate: number;
+  cities: TargetCity[];
+  ageRange: [number, number];
+  preferUnpolished: boolean;
+}
+
+// Default Street Casting presets
+export const STREET_CASTING_PRESETS: StreetCastingFilters = {
+  followerRange: [1000, 3000],
+  maxEngagementRate: 1.0,
+  cities: ['NYC', 'LA', 'Chicago', 'Atlanta'],
+  ageRange: [18, 24],
+  preferUnpolished: true,
+};
+
+export const STREET_CASTING_HASHTAGS = [
+  'newfaces',
+  'streetcasting',
+  'facesofnyc',
+  'editorialportrait',
+  'digitalsonly',
+];
 
 export interface Candidate {
   id: string;
@@ -37,6 +65,24 @@ export interface Candidate {
   engagement_health_score: number | null;
   discovery_job_id: string | null;
   vision_analyzed: boolean;
+  // Street Casting scores
+  estimated_age: number | null;
+  age_confidence: number | null;
+  raw_potential_score: number | null;
+  street_casting_score: number | null;
+  content_authenticity_score: number | null;
+}
+
+// Street Casting analysis dimensions
+export interface StreetCastingAnalysis {
+  estimated_age: number;
+  age_confidence: number;
+  raw_potential_score: number;
+  street_casting_score: number;
+  content_authenticity_score: number;
+  content_style: 'professional' | 'semi-professional' | 'amateur' | 'candid';
+  device_quality: 'dslr' | 'mirrorless' | 'iphone' | 'android' | 'unknown';
+  authenticity_signals: string[];
 }
 
 // Discovery job for tracking scraping operations
@@ -53,6 +99,11 @@ export interface DiscoveryJob {
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
+  // Street Casting enhancements
+  filters: StreetCastingFilters | null;
+  hashtags: string[] | null;
+  platforms_searched: DiscoveryPlatform[] | null;
+  street_casting_mode: boolean;
 }
 
 // Individual dimension score with details
@@ -143,6 +194,16 @@ export interface StartDiscoveryRequest {
   search_type: SearchType;
   search_query: string;
   limit?: number;
+}
+
+// Enhanced discovery request for Street Casting
+export interface EnhancedDiscoveryRequest {
+  platforms: DiscoveryPlatformOption;
+  search_type: SearchType;
+  hashtags: string[];
+  limit?: number;
+  street_casting_mode: boolean;
+  filters?: StreetCastingFilters;
 }
 
 export interface AnalyzeRequest {
