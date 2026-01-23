@@ -284,9 +284,10 @@ export async function POST(request: Request) {
         .update({ candidates_found: filteredProfiles.length })
         .eq('id', job.id);
 
-      // Analyze and save profiles (limit to first 10 for speed, can be increased)
+      // Analyze and save profiles - at least half of found, capped at 25
       let analyzedCount = 0;
-      const profilesToAnalyze = filteredProfiles.slice(0, 10);
+      const analyzeLimit = Math.min(Math.max(Math.ceil(filteredProfiles.length / 2), 10), 25);
+      const profilesToAnalyze = filteredProfiles.slice(0, analyzeLimit);
 
       for (const profile of profilesToAnalyze) {
         try {
