@@ -96,14 +96,88 @@ function normalizeTikTokProfile(item: Record<string, unknown>): ApifyProfile | n
   }
 }
 
+// Check if profile shows obvious signs of being already signed
+function isLikelySignedModel(profile: ApifyProfile): boolean {
+  const bio = (profile.biography || '').toLowerCase();
+  const fullName = (profile.fullName || '').toLowerCase();
+
+  // Agency/management signals
+  const agencySignals = [
+    'model at',
+    'model @',
+    'signed to',
+    'signed with',
+    'represented by',
+    'management:',
+    'mgmt:',
+    'agency:',
+    '@models',
+    '@mgmt',
+    '@management',
+    '@agency',
+    'booking:',
+    'bookings:',
+    'mother agency',
+    'img models',
+    'elite model',
+    'wilhelmina',
+    'ford models',
+    'next models',
+    'storm models',
+  ];
+
+  // Professional model signals in bio
+  const proSignals = [
+    'fashion model',
+    'commercial model',
+    'runway model',
+    'signed model',
+    'professional model',
+    'international model',
+    'top model',
+    'supermodel',
+  ];
+
+  // Check for agency mentions
+  for (const signal of agencySignals) {
+    if (bio.includes(signal)) return true;
+  }
+
+  // Check for professional model self-identification
+  for (const signal of proSignals) {
+    if (bio.includes(signal)) return true;
+  }
+
+  // Check for modeling agency email patterns
+  const emailPatterns = [
+    /\w+@\w*model\w*\.(com|co|agency)/i,
+    /\w+@\w*mgmt\w*\.(com|co)/i,
+    /\w+@\w*talent\w*\.(com|co)/i,
+  ];
+  for (const pattern of emailPatterns) {
+    if (pattern.test(bio)) return true;
+  }
+
+  // Check for professional website links
+  if (bio.includes('models.com') || bio.includes('modeling.com')) return true;
+
+  // Verified accounts are usually already established
+  if (profile.isVerified) return true;
+
+  return false;
+}
+
 // Apply filters to scraped profiles
 function applyFilters(
   profiles: ApifyProfile[],
   filters: StreetCastingFilters | undefined
 ): ApifyProfile[] {
-  if (!filters) return profiles;
+  // Always filter out obviously signed models for street casting
+  let filtered = profiles.filter((profile) => !isLikelySignedModel(profile));
 
-  return profiles.filter((profile) => {
+  if (!filters) return filtered;
+
+  return filtered.filter((profile) => {
     // Filter by follower range (if we have follower data)
     if (profile.followersCount > 0) {
       const [minFollowers, maxFollowers] = filters.followerRange;
