@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -16,6 +17,7 @@ import {
   User,
   RefreshCw,
   Trash2,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { DiscoveryJob } from '@/types';
@@ -29,6 +31,7 @@ interface JobStatusProps {
 export function JobStatus({ jobs, onRefresh, onDelete }: JobStatusProps) {
   const [now, setNow] = useState(new Date());
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const router = useRouter();
 
   // Update time every second for relative timestamps
   useEffect(() => {
@@ -152,7 +155,12 @@ export function JobStatus({ jobs, onRefresh, onDelete }: JobStatusProps) {
         {jobs.map((job) => (
           <div
             key={job.id}
-            className="rounded-lg border border-zinc-200 p-4 transition-colors hover:border-zinc-300"
+            className="rounded-lg border border-zinc-200 p-4 transition-colors hover:border-accent/50 hover:bg-accent/5 cursor-pointer group"
+            onClick={() => {
+              if (job.status === 'completed' && job.candidates_analyzed > 0) {
+                router.push(`/dashboard?job=${job.id}`);
+              }
+            }}
           >
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -173,11 +181,17 @@ export function JobStatus({ jobs, onRefresh, onDelete }: JobStatusProps) {
               </div>
               <div className="flex items-center gap-2">
                 {getStatusBadge(job.status)}
+                {job.status === 'completed' && job.candidates_analyzed > 0 && (
+                  <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-accent transition-colors" />
+                )}
                 {onDelete && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(job.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(job.id);
+                    }}
                     disabled={deletingId === job.id}
                     className="h-8 w-8 p-0 text-zinc-400 hover:text-red-500"
                   >

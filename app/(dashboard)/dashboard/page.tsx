@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { ScoreDimensions } from '@/components/candidates/ScoreDimensions';
 import { createClient } from '@/lib/supabase/server';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowLeft, Target } from 'lucide-react';
 import type { Candidate } from '@/types';
 
 const statusColors: Record<string, string> = {
@@ -14,15 +14,41 @@ const statusColors: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700',
 };
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+interface DashboardPageProps {
+  searchParams: Promise<{ job?: string }>;
+}
 
-  // Fetch candidates from database
-  const { data: candidates } = await supabase
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const supabase = await createClient();
+  const params = await searchParams;
+  const jobId = params.job;
+
+  // Build query
+  let query = supabase
     .from('candidates')
-    .select('*')
+    .select('*');
+
+  // Filter by job if specified
+  if (jobId) {
+    query = query.eq('discovery_job_id', jobId);
+  }
+
+  // Order by street_casting_score if available, fallback to ai_score
+  const { data: candidates } = await query
+    .order('street_casting_score', { ascending: false, nullsFirst: false })
     .order('ai_score', { ascending: false })
     .limit(50);
+
+  // Fetch job details if filtering by job
+  let jobDetails = null;
+  if (jobId) {
+    const { data } = await supabase
+      .from('discovery_jobs')
+      .select('*')
+      .eq('id', jobId)
+      .single();
+    jobDetails = data;
+  }
 
   // Calculate stats from real data
   const stats = [
@@ -34,14 +60,39 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Job Filter Header */}
+      {jobId && jobDetails && (
+        <div className="flex items-center gap-4 p-4 bg-accent/5 rounded-xl border border-accent/20">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            All Candidates
+          </Link>
+          <div className="h-6 w-px bg-zinc-200" />
+          <div className="flex items-center gap-2">
+            {jobDetails.street_casting_mode && (
+              <Target className="h-4 w-4 text-accent" />
+            )}
+            <span className="font-medium text-zinc-900">
+              #{jobDetails.search_query}
+            </span>
+            <Badge variant="secondary" className="bg-accent/10 text-accent">
+              {candidates?.length || 0} candidates
+            </Badge>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="font-editorial text-4xl md:text-5xl italic tracking-tight text-zinc-900">
-            Discover
+            {jobId ? 'Job Results' : 'Discover'}
           </h1>
           <p className="text-zinc-500 mt-1">
-            Your talent discovery pipeline
+            {jobId ? `Candidates from discovery job` : 'Your talent discovery pipeline'}
           </p>
         </div>
 
@@ -66,9 +117,13 @@ export default async function DashboardPage() {
           <div className="mb-6 rounded-full bg-accent/10 p-6">
             <Sparkles className="h-12 w-12 text-accent" />
           </div>
-          <h2 className="text-2xl font-semibold text-zinc-900 mb-2">No candidates yet</h2>
+          <h2 className="text-2xl font-semibold text-zinc-900 mb-2">
+            {jobId ? 'No candidates in this job' : 'No candidates yet'}
+          </h2>
           <p className="text-zinc-500 max-w-md mb-6">
-            Start discovering talent by running a search on Instagram or TikTok, or upload a CSV of profiles.
+            {jobId
+              ? 'This discovery job didn\'t find any candidates matching your criteria.'
+              : 'Start discovering talent by running a search on Instagram or TikTok, or upload a CSV of profiles.'}
           </p>
           <div className="flex gap-3">
             <Link
@@ -77,12 +132,14 @@ export default async function DashboardPage() {
             >
               Start Discovery
             </Link>
-            <Link
-              href="/upload"
-              className="px-6 py-3 rounded-full border border-zinc-200 text-zinc-600 font-medium hover:bg-zinc-50 transition-colors"
-            >
-              Upload CSV
-            </Link>
+            {!jobId && (
+              <Link
+                href="/upload"
+                className="px-6 py-3 rounded-full border border-zinc-200 text-zinc-600 font-medium hover:bg-zinc-50 transition-colors"
+              >
+                Upload CSV
+              </Link>
+            )}
           </div>
         </div>
       ) : (
@@ -114,11 +171,13 @@ export default async function DashboardPage() {
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Score Badge */}
-                  {candidate.ai_score && (
+                  {/* Score Badge - Show street_casting_score if available */}
+                  {(candidate.street_casting_score || candidate.ai_score) && (
                     <div className="absolute top-3 right-3">
                       <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                        <span className="text-sm font-bold text-zinc-900">{candidate.ai_score}</span>
+                        <span className="text-sm font-bold text-zinc-900">
+                          {candidate.street_casting_score || candidate.ai_score}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -129,6 +188,17 @@ export default async function DashboardPage() {
                       {candidate.status}
                     </Badge>
                   </div>
+
+                  {/* Estimated Age Badge (for street casting) */}
+                  {candidate.estimated_age && (
+                    <div className="absolute bottom-3 right-3">
+                      <div className="bg-black/70 backdrop-blur-sm rounded-full px-2 py-0.5">
+                        <span className="text-xs font-medium text-white">
+                          ~{candidate.estimated_age}y
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Info Overlay on Hover */}
                   {candidate.handle && (
