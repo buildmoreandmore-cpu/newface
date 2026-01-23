@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, KeyboardEvent } from 'react';
-import { X, Hash, AtSign } from 'lucide-react';
+import { X, Hash, AtSign, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface HashtagInputProps {
   hashtags: string[];
@@ -77,18 +78,30 @@ export function HashtagInput({
           </Badge>
         ))}
       </div>
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
-          <Icon className="h-4 w-4" />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+            <Icon className="h-4 w-4" />
+          </div>
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={hashtags.length >= maxTags ? 'Max tags reached' : placeholder}
+            disabled={hashtags.length >= maxTags}
+            className="pl-10"
+          />
         </div>
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={hashtags.length >= maxTags ? 'Max tags reached' : placeholder}
-          disabled={hashtags.length >= maxTags}
-          className="pl-10"
-        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addHashtag(inputValue)}
+          disabled={!inputValue.trim() || hashtags.length >= maxTags}
+          className="px-3"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
       <p className="text-xs text-zinc-500">
         Press Enter, comma, or space to add. {hashtags.length}/{maxTags} {isUsername ? 'accounts' : 'tags'}.
