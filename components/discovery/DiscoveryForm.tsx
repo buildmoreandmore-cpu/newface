@@ -241,6 +241,7 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
                   : 'Enter hashtags without #'
               }
               maxTags={10}
+              mode={searchType === 'followers' ? 'username' : 'hashtag'}
             />
             {searchType === 'followers' && (
               <p className="text-xs text-zinc-500">

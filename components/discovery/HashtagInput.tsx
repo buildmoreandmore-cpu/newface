@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, KeyboardEvent } from 'react';
-import { X, Hash } from 'lucide-react';
+import { X, Hash, AtSign } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
@@ -10,6 +10,7 @@ interface HashtagInputProps {
   onChange: (hashtags: string[]) => void;
   placeholder?: string;
   maxTags?: number;
+  mode?: 'hashtag' | 'username';
 }
 
 export function HashtagInput({
@@ -17,11 +18,14 @@ export function HashtagInput({
   onChange,
   placeholder = 'Type hashtag and press Enter',
   maxTags = 10,
+  mode = 'hashtag',
 }: HashtagInputProps) {
   const [inputValue, setInputValue] = useState('');
+  const isUsername = mode === 'username';
+  const Icon = isUsername ? AtSign : Hash;
 
   const addHashtag = (tag: string) => {
-    const cleaned = tag.toLowerCase().replace(/^#/, '').trim();
+    const cleaned = tag.toLowerCase().replace(/^[#@]/, '').trim();
     if (cleaned && !hashtags.includes(cleaned) && hashtags.length < maxTags) {
       onChange([...hashtags, cleaned]);
     }
@@ -53,14 +57,20 @@ export function HashtagInput({
           <Badge
             key={tag}
             variant="secondary"
-            className="flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent border-accent/20"
+            className={`flex items-center gap-1 px-2 py-1 ${
+              isUsername
+                ? 'bg-purple-100 text-purple-700 border-purple-200'
+                : 'bg-accent/10 text-accent border-accent/20'
+            }`}
           >
-            <Hash className="h-3 w-3" />
+            <Icon className="h-3 w-3" />
             {tag}
             <button
               type="button"
               onClick={() => removeHashtag(tag)}
-              className="ml-1 hover:bg-accent/20 rounded-full p-0.5"
+              className={`ml-1 rounded-full p-0.5 ${
+                isUsername ? 'hover:bg-purple-200' : 'hover:bg-accent/20'
+              }`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -69,7 +79,7 @@ export function HashtagInput({
       </div>
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
-          <Hash className="h-4 w-4" />
+          <Icon className="h-4 w-4" />
         </div>
         <Input
           value={inputValue}
@@ -81,7 +91,7 @@ export function HashtagInput({
         />
       </div>
       <p className="text-xs text-zinc-500">
-        Press Enter, comma, or space to add. {hashtags.length}/{maxTags} tags.
+        Press Enter, comma, or space to add. {hashtags.length}/{maxTags} {isUsername ? 'accounts' : 'tags'}.
       </p>
     </div>
   );
