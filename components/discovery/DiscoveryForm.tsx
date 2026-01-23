@@ -387,7 +387,9 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
           {/* Helper Text */}
           {hashtags.length === 0 && (
             <p className="text-center text-sm text-amber-600">
-              Add at least one hashtag to start discovery
+              {searchType === 'followers'
+                ? 'Add at least one account to start discovery'
+                : 'Add at least one hashtag to start discovery'}
             </p>
           )}
         </form>
