@@ -10,7 +10,7 @@ export type Platform = 'instagram' | 'tiktok' | 'linkedin' | 'other';
 
 export type DiscoveryPlatform = 'instagram' | 'tiktok';
 export type DiscoveryPlatformOption = 'instagram' | 'tiktok' | 'both';
-export type SearchType = 'hashtag' | 'location' | 'profile';
+export type SearchType = 'hashtag' | 'location' | 'profile' | 'followers';
 export type JobStatus = 'pending' | 'running' | 'completed' | 'failed';
 export type TargetCity = 'NYC' | 'LA' | 'Chicago' | 'Atlanta';
 

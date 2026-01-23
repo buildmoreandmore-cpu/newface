@@ -270,6 +270,123 @@ async function scrapeHashtags(
   return profiles;
 }
 
+// Normalize follower profile data from Instagram profile scraper
+function normalizeFollowerProfile(item: Record<string, unknown>): ApifyProfile | null {
+  try {
+    const username = String(item.username || '');
+    if (!username) return null;
+
+    const followersCount = Number(item.followersCount || item.followers || 0);
+    const followingCount = Number(item.followingCount || item.following || 0);
+    const postsCount = Number(item.postsCount || item.posts || 0);
+
+    // Calculate engagement rate if we have the data
+    let engagementRate = 0;
+    if (followersCount > 0 && postsCount > 0) {
+      const avgLikes = Number(item.avgLikes || 0);
+      const avgComments = Number(item.avgComments || 0);
+      engagementRate = Math.round(((avgLikes + avgComments) / followersCount) * 100 * 100) / 100;
+    }
+
+    return {
+      username,
+      fullName: String(item.fullName || item.full_name || username),
+      biography: String(item.biography || item.bio || ''),
+      profilePicUrl: String(item.profilePicUrl || item.profilePicture || item.profile_pic_url || ''),
+      followersCount,
+      followingCount,
+      postsCount,
+      engagementRate,
+      isVerified: Boolean(item.isVerified || item.verified),
+      isBusinessAccount: Boolean(item.isBusinessAccount || item.is_business),
+      externalUrl: item.externalUrl ? String(item.externalUrl) : null,
+      email: item.email ? String(item.email) : null,
+      phone: item.phone ? String(item.phone) : null,
+      location: item.city ? String(item.city) : null,
+      recentPosts: [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Scrape followers from target accounts
+async function scrapeFollowers(
+  client: ApifyClient,
+  platform: DiscoveryPlatform,
+  usernames: string[],
+  limit: number
+): Promise<ApifyProfile[]> {
+  const profiles: ApifyProfile[] = [];
+  const seenUsernames = new Set<string>();
+
+  // Instagram follower scraping
+  if (platform === 'instagram') {
+    for (const username of usernames) {
+      const cleanUsername = username.replace(/^@/, '');
+
+      try {
+        // Use Instagram Profile Scraper to get followers
+        const run = await client.actor('apify/instagram-profile-scraper').call({
+          usernames: [cleanUsername],
+          resultsLimit: Math.min(Math.ceil(limit / usernames.length), 50),
+          scrapeFollowers: true,
+          scrapeFollowing: false,
+          scrapePosts: false,
+        }, {
+          waitSecs: 180,
+        });
+
+        const { items } = await client.dataset(run.defaultDatasetId).listItems();
+
+        // The scraper returns the profile with a followers array
+        for (const item of items as Record<string, unknown>[]) {
+          const followers = (item.followers || []) as Record<string, unknown>[];
+          for (const follower of followers) {
+            const profile = normalizeFollowerProfile(follower);
+            if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
+              seenUsernames.add(profile.username.toLowerCase());
+              profiles.push(profile);
+            }
+          }
+        }
+      } catch (err) {
+        console.error(`Error scraping followers of @${cleanUsername}:`, err);
+      }
+    }
+  } else {
+    // TikTok follower scraping - use a different approach
+    for (const username of usernames) {
+      const cleanUsername = username.replace(/^@/, '');
+
+      try {
+        const run = await client.actor('clockworks/tiktok-scraper').call({
+          profiles: [cleanUsername],
+          resultsPerPage: Math.min(Math.ceil(limit / usernames.length), 30),
+          shouldDownloadVideos: false,
+          shouldDownloadCovers: false,
+        }, {
+          waitSecs: 120,
+        });
+
+        const { items } = await client.dataset(run.defaultDatasetId).listItems();
+
+        for (const item of items as Record<string, unknown>[]) {
+          const profile = normalizeTikTokProfile(item);
+          if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
+            seenUsernames.add(profile.username.toLowerCase());
+            profiles.push(profile);
+          }
+        }
+      } catch (err) {
+        console.error(`Error scraping TikTok profile @${cleanUsername}:`, err);
+      }
+    }
+  }
+
+  return profiles;
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
 
@@ -330,14 +447,17 @@ export async function POST(request: Request) {
       // Scrape platforms in parallel if searching both
       let allProfiles: ApifyProfile[] = [];
 
+      // Choose scraping function based on search type
+      const scrapeFn = search_type === 'followers' ? scrapeFollowers : scrapeHashtags;
+
       if (platforms === 'both') {
         const [instagramProfiles, tiktokProfiles] = await Promise.all([
-          scrapeHashtags(client, 'instagram', hashtags, Math.ceil(limit / 2)),
-          scrapeHashtags(client, 'tiktok', hashtags, Math.ceil(limit / 2)),
+          scrapeFn(client, 'instagram', hashtags, Math.ceil(limit / 2)),
+          scrapeFn(client, 'tiktok', hashtags, Math.ceil(limit / 2)),
         ]);
         allProfiles = [...instagramProfiles, ...tiktokProfiles];
       } else {
-        allProfiles = await scrapeHashtags(client, platforms, hashtags, limit);
+        allProfiles = await scrapeFn(client, platforms, hashtags, limit);
       }
 
       // Deduplicate across platforms by username

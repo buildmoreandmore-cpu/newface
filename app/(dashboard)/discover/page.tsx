@@ -101,6 +101,17 @@ export default function DiscoverPage() {
     });
   };
 
+  // Quick follower search
+  const handleFollowerSearch = (username: string) => {
+    handleStartDiscovery({
+      platforms: 'instagram',
+      search_type: 'followers',
+      hashtags: [username],
+      limit: 50,
+      street_casting_mode: true,
+    });
+  };
+
   // Delete a job
   const handleDeleteJob = async (jobId: string) => {
     try {
@@ -209,7 +220,7 @@ export default function DiscoverPage() {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-zinc-700 mb-2">Street Casting</p>
+              <p className="text-sm font-medium text-zinc-700 mb-2">Street Casting Hashtags</p>
               <div className="flex flex-wrap gap-2">
                 {[
                   'newfaces',
@@ -232,7 +243,31 @@ export default function DiscoverPage() {
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-700 mb-2">General Discovery</p>
+              <p className="text-sm font-medium text-zinc-700 mb-2">Follower Search - Street Casting Accounts</p>
+              <p className="text-xs text-zinc-500 mb-2">Scrape followers of these accounts to find undiscovered talent</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'wethepeoplenyc',
+                  'streetcastingnyc',
+                  'scouted',
+                  'motherscouting',
+                  'streetscout',
+                  'castingcallclub',
+                  'newfaces_nyc',
+                ].map((account) => (
+                  <Badge
+                    key={account}
+                    variant="secondary"
+                    className="cursor-pointer bg-purple-100 text-purple-700 hover:bg-purple-200"
+                    onClick={() => handleFollowerSearch(account)}
+                  >
+                    @{account}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-700 mb-2">General Discovery Hashtags</p>
               <div className="flex flex-wrap gap-2">
                 {[
                   'modellife',

@@ -24,6 +24,7 @@ import {
   ChevronUp,
   Sparkles,
   Users,
+  UserPlus,
 } from 'lucide-react';
 import { HashtagInput } from './HashtagInput';
 import { RangeFilter, SingleValueFilter } from './RangeFilter';
@@ -216,19 +217,36 @@ export function DiscoveryForm({ onSubmit, isLoading = false }: DiscoveryFormProp
                     Profile Search
                   </div>
                 </SelectItem>
+                <SelectItem value="followers">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Followers Search
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Hashtag Input */}
+          {/* Hashtag/Account Input */}
           <div className="space-y-2">
-            <Label>Hashtags to Search</Label>
+            <Label>
+              {searchType === 'followers' ? 'Accounts to Scrape Followers From' : 'Hashtags to Search'}
+            </Label>
             <HashtagInput
               hashtags={hashtags}
               onChange={setHashtags}
-              placeholder="Enter hashtags without #"
+              placeholder={
+                searchType === 'followers'
+                  ? 'Enter usernames without @'
+                  : 'Enter hashtags without #'
+              }
               maxTags={10}
             />
+            {searchType === 'followers' && (
+              <p className="text-xs text-zinc-500">
+                Scrape followers of street casting accounts, small agencies, or photography pages
+              </p>
+            )}
           </div>
 
           {/* Result Limit */}
