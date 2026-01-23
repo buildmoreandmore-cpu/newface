@@ -310,7 +310,8 @@ function normalizeFollowerProfile(item: Record<string, unknown>): ApifyProfile |
   }
 }
 
-// Scrape followers from target accounts
+// Scrape profiles related to target accounts (via post commenters/likers)
+// This finds people actively engaging with casting/scouting accounts
 async function scrapeFollowers(
   client: ApifyClient,
   platform: DiscoveryPlatform,
@@ -320,42 +321,87 @@ async function scrapeFollowers(
   const profiles: ApifyProfile[] = [];
   const seenUsernames = new Set<string>();
 
-  // Instagram follower scraping
   if (platform === 'instagram') {
     for (const username of usernames) {
       const cleanUsername = username.replace(/^@/, '');
 
       try {
-        // Use Instagram Profile Scraper to get followers
-        const run = await client.actor('apify/instagram-profile-scraper').call({
-          usernames: [cleanUsername],
-          resultsLimit: Math.min(Math.ceil(limit / usernames.length), 50),
-          scrapeFollowers: true,
-          scrapeFollowing: false,
-          scrapePosts: false,
+        // First, get recent posts from the target account
+        const postsRun = await client.actor('apify/instagram-scraper').call({
+          directUrls: [`https://www.instagram.com/${cleanUsername}/`],
+          resultsType: 'posts',
+          resultsLimit: 10, // Get last 10 posts
         }, {
-          waitSecs: 180,
+          waitSecs: 120,
         });
 
-        const { items } = await client.dataset(run.defaultDatasetId).listItems();
+        const { items: posts } = await client.dataset(postsRun.defaultDatasetId).listItems();
 
-        // The scraper returns the profile with a followers array
-        for (const item of items as Record<string, unknown>[]) {
-          const followers = (item.followers || []) as Record<string, unknown>[];
-          for (const follower of followers) {
-            const profile = normalizeFollowerProfile(follower);
-            if (profile && !seenUsernames.has(profile.username.toLowerCase())) {
-              seenUsernames.add(profile.username.toLowerCase());
-              profiles.push(profile);
+        // Extract unique commenters/taggers from posts
+        for (const post of posts as Record<string, unknown>[]) {
+          // Get commenters
+          const comments = (post.comments || post.latestComments || []) as Record<string, unknown>[];
+          for (const comment of comments) {
+            const owner = (comment.owner || {}) as Record<string, unknown>;
+            const ownerUsername = String(comment.ownerUsername || owner.username || '');
+            if (ownerUsername && !seenUsernames.has(ownerUsername.toLowerCase())) {
+              seenUsernames.add(ownerUsername.toLowerCase());
+              profiles.push({
+                username: ownerUsername,
+                fullName: String(comment.ownerFullName || owner.fullName || ownerUsername),
+                biography: '',
+                profilePicUrl: String(comment.ownerProfilePicUrl || owner.profilePicUrl || ''),
+                followersCount: 0,
+                followingCount: 0,
+                postsCount: 0,
+                engagementRate: 0,
+                isVerified: false,
+                isBusinessAccount: false,
+                externalUrl: null,
+                email: null,
+                phone: null,
+                location: null,
+                recentPosts: [],
+              });
             }
+            if (profiles.length >= limit) break;
           }
+
+          // Also check tagged users if available
+          const taggedUsers = (post.taggedUsers || []) as Record<string, unknown>[];
+          for (const tagged of taggedUsers) {
+            const taggedUsername = String(tagged.username || tagged.full_name || '');
+            if (taggedUsername && !seenUsernames.has(taggedUsername.toLowerCase())) {
+              seenUsernames.add(taggedUsername.toLowerCase());
+              profiles.push({
+                username: taggedUsername,
+                fullName: String(tagged.full_name || taggedUsername),
+                biography: '',
+                profilePicUrl: String(tagged.profile_pic_url || ''),
+                followersCount: 0,
+                followingCount: 0,
+                postsCount: 0,
+                engagementRate: 0,
+                isVerified: false,
+                isBusinessAccount: false,
+                externalUrl: null,
+                email: null,
+                phone: null,
+                location: null,
+                recentPosts: [],
+              });
+            }
+            if (profiles.length >= limit) break;
+          }
+
+          if (profiles.length >= limit) break;
         }
       } catch (err) {
-        console.error(`Error scraping followers of @${cleanUsername}:`, err);
+        console.error(`Error scraping posts from @${cleanUsername}:`, err);
       }
     }
   } else {
-    // TikTok follower scraping - use a different approach
+    // TikTok - scrape commenters from videos
     for (const username of usernames) {
       const cleanUsername = username.replace(/^@/, '');
 
